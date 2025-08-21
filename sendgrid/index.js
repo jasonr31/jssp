@@ -7,6 +7,11 @@ metadata = {
       displayName: "API Key",
       type: "string",
       required: !0
+    },
+    baseUrl: {
+      displayName: "Base URL",
+      type: "string",
+      required: !0
     }
   }
 };
@@ -26,7 +31,7 @@ ondescribe = async function({ configuration: t }) {
           // Input properties for mail send
           from_email: {
             displayName: "From Email",
-            description: "Sender email address",
+            description: "Sender email address. NOTE: This must be a verified sender in SendGrid.",
             type: "string"
           },
           from_name: {
@@ -111,22 +116,22 @@ onexecute = async function({
   objectName: t,
   methodName: a,
   parameters: s,
-  properties: n,
+  properties: i,
   configuration: e,
-  schema: i
+  schema: n
 }) {
   switch (t) {
     case "mail":
-      await r(a, n, e);
+      await o(a, i, e);
       break;
     case "batch":
-      await d(a, n, e);
+      await d(a, i, e);
       break;
     default:
       throw new Error("The object " + t + " is not supported.");
   }
 };
-async function r(t, a, s) {
+async function o(t, a, s) {
   switch (t) {
     case "send":
       await c(a, s);
@@ -138,18 +143,19 @@ async function r(t, a, s) {
 async function d(t, a, s) {
   switch (t) {
     case "create":
-      await u(s, a);
+      await l(s, a);
       break;
     case "validate":
-      await h(a, s);
+      await u(a, s);
       break;
     default:
       throw new Error("The method " + t + " is not supported.");
   }
 }
 function c(t, a) {
-  return new Promise((s, n) => {
+  return new Promise((s, i) => {
     if (!a.apiKey) throw new Error("API Key not provided in configuration");
+    if (!a.baseUrl) throw new Error("Base URL not provided in configuration");
     const e = new XMLHttpRequest();
     e.onreadystatechange = function() {
       try {
@@ -160,11 +166,11 @@ function c(t, a) {
           }), s();
         else
           throw new Error("Failed with status " + e.status);
-      } catch (o) {
-        n(o);
+      } catch (r) {
+        i(r);
       }
     };
-    const i = {
+    const n = {
       personalizations: [{
         to: [{
           email: t.to_email,
@@ -181,35 +187,37 @@ function c(t, a) {
         value: t.content
       }]
     };
-    e.open("POST", "https://api.sendgrid.com/v3/mail/send"), e.setRequestHeader("Authorization", `Bearer ${a.apiKey}`), e.setRequestHeader("Content-Type", "application/json"), e.send(JSON.stringify(i));
+    e.open("POST", `${a.baseUrl}/v3/mail/send`), e.setRequestHeader("Authorization", `Bearer ${a.apiKey}`), e.setRequestHeader("Content-Type", "application/json"), e.send(JSON.stringify(n));
   });
 }
-function u(t, a) {
-  return new Promise((s, n) => {
+function l(t, a) {
+  return new Promise((s, i) => {
     if (!t.apiKey) throw new Error("API Key not provided in configuration");
+    if (!t.baseUrl) throw new Error("Base URL not provided in configuration");
     const e = new XMLHttpRequest();
     e.onreadystatechange = function() {
       try {
         if (e.readyState !== 4) return;
         if (e.status === 201) {
-          const o = JSON.parse(e.responseText);
+          const r = JSON.parse(e.responseText);
           postResult({
-            batch_id: o.batch_id,
+            batch_id: r.batch_id,
             status: "created"
           }), s();
         } else
           throw new Error("Failed with status " + e.status);
-      } catch (o) {
-        n(o);
+      } catch (r) {
+        i(r);
       }
-    }, e.open("POST", "https://api.sendgrid.com/v3/mail/batch"), e.setRequestHeader("Authorization", `Bearer ${t.apiKey}`), a.on_behalf_of && e.setRequestHeader("on-behalf-of", a.on_behalf_of);
-    const i = a.send_at ? { send_at: a.send_at } : {};
-    e.setRequestHeader("Content-Type", "application/json"), e.send(JSON.stringify(i));
+    }, e.open("POST", `${t.baseUrl}/v3/mail/batch`), e.setRequestHeader("Authorization", `Bearer ${t.apiKey}`), a.on_behalf_of && e.setRequestHeader("on-behalf-of", a.on_behalf_of);
+    const n = a.send_at ? { send_at: a.send_at } : {};
+    e.setRequestHeader("Content-Type", "application/json"), e.send(JSON.stringify(n));
   });
 }
-function h(t, a) {
-  return new Promise((s, n) => {
+function u(t, a) {
+  return new Promise((s, i) => {
     if (!a.apiKey) throw new Error("API Key not provided in configuration");
+    if (!a.baseUrl) throw new Error("Base URL not provided in configuration");
     if (!t.batch_id) throw new Error("Batch ID is required");
     const e = new XMLHttpRequest();
     e.onreadystatechange = function() {
@@ -222,10 +230,10 @@ function h(t, a) {
           }), s();
         else
           throw new Error("Failed with status " + e.status);
-      } catch (i) {
-        n(i);
+      } catch (n) {
+        i(n);
       }
-    }, e.open("GET", `https://api.sendgrid.com/v3/mail/batch/${encodeURIComponent(t.batch_id)}`), e.setRequestHeader("Authorization", `Bearer ${a.apiKey}`), t.on_behalf_of && e.setRequestHeader("on-behalf-of", t.on_behalf_of), e.send();
+    }, e.open("GET", `${a.baseUrl}/v3/mail/batch/${encodeURIComponent(t.batch_id)}`), e.setRequestHeader("Authorization", `Bearer ${a.apiKey}`), t.on_behalf_of && e.setRequestHeader("on-behalf-of", t.on_behalf_of), e.send();
   });
 }
 //# sourceMappingURL=index.js.map
