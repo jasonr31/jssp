@@ -6,7 +6,7 @@ metadata = {
     apiKey: {
       displayName: "API Key",
       type: "string",
-      required: !0
+      required: true
     }
   }
 };
