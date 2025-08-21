@@ -6,12 +6,15 @@ metadata = {
     apiKey: {
       displayName: "API Key",
       type: "string",
-      required: !0
+      required: !0,
+      masked: !0
+      // This will mask the API key in the UI          
     },
     baseUrl: {
       displayName: "Base URL",
       type: "string",
-      required: !0
+      required: !0,
+      value: "https://api.sendgrid.com"
     }
   }
 };
