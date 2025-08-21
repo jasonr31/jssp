@@ -2,10 +2,9 @@ metadata = {
   systemName: "com.k2.sendgrid",
   displayName: "SendGrid Mail Service",
   description: "A service broker for SendGrid's Mail API v3.",
-  parameters: {
+  configuration: {
     apiKey: {
       displayName: "API Key",
-      description: "SendGrid API Key for authentication",
       type: "string",
       required: !0
     }
@@ -110,7 +109,7 @@ onexecute = async function({
       await o(i, a, t);
       break;
     case "batch":
-      await d(i, a, t);
+      await c(i, a, t);
       break;
     default:
       throw new Error("The object " + e + " is not supported.");
@@ -119,13 +118,13 @@ onexecute = async function({
 async function o(e, i, s) {
   switch (e) {
     case "send":
-      await c(i, s);
+      await d(i, s);
       break;
     default:
       throw new Error("The method " + e + " is not supported.");
   }
 }
-async function d(e, i, s) {
+async function c(e, i, s) {
   switch (e) {
     case "create":
       await p(s);
@@ -137,7 +136,7 @@ async function d(e, i, s) {
       throw new Error("The method " + e + " is not supported.");
   }
 }
-function c(e, i) {
+function d(e, i) {
   return new Promise((s, a) => {
     if (!i.apiKey) throw new Error("API Key not provided in configuration");
     const t = new XMLHttpRequest();
