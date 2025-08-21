@@ -6,11 +6,11 @@ metadata = {
     apiKey: {
       displayName: "API Key",
       type: "string",
-      required: true
+      required: !0
     }
   }
 };
-ondescribe = async function({ configuration: e }) {
+ondescribe = async function({ configuration: t }) {
   postSchema({
     objects: {
       mail: {
@@ -77,19 +77,30 @@ ondescribe = async function({ configuration: e }) {
             displayName: "Status",
             description: "Batch operation status",
             type: "string"
+          },
+          send_at: {
+            displayName: "Send At",
+            description: "UTC timestamp for when to send the batch",
+            type: "datetime"
+          },
+          on_behalf_of: {
+            displayName: "On Behalf Of",
+            description: "Subuser to send the batch on behalf of",
+            type: "string"
           }
         },
         methods: {
           create: {
             displayName: "Create Batch",
             type: "create",
+            inputs: ["send_at", "on_behalf_of"],
             outputs: ["batch_id", "status"]
           },
           validate: {
             displayName: "Validate Batch",
             type: "read",
-            inputs: ["batch_id"],
-            outputs: ["status"]
+            inputs: ["batch_id", "on_behalf_of"],
+            outputs: ["batch_id", "status"]
           }
         }
       }
@@ -97,122 +108,124 @@ ondescribe = async function({ configuration: e }) {
   });
 };
 onexecute = async function({
-  objectName: e,
-  methodName: i,
+  objectName: t,
+  methodName: a,
   parameters: s,
-  properties: a,
-  configuration: t,
-  schema: n
+  properties: n,
+  configuration: e,
+  schema: i
 }) {
-  switch (e) {
+  switch (t) {
     case "mail":
-      await o(i, a, t);
+      await r(a, n, e);
       break;
     case "batch":
-      await c(i, a, t);
+      await d(a, n, e);
       break;
     default:
-      throw new Error("The object " + e + " is not supported.");
+      throw new Error("The object " + t + " is not supported.");
   }
 };
-async function o(e, i, s) {
-  switch (e) {
+async function r(t, a, s) {
+  switch (t) {
     case "send":
-      await d(i, s);
+      await c(a, s);
       break;
     default:
-      throw new Error("The method " + e + " is not supported.");
+      throw new Error("The method " + t + " is not supported.");
   }
 }
-async function c(e, i, s) {
-  switch (e) {
+async function d(t, a, s) {
+  switch (t) {
     case "create":
-      await p(s);
+      await u(s, a);
       break;
     case "validate":
-      await u(i, s);
+      await h(a, s);
       break;
     default:
-      throw new Error("The method " + e + " is not supported.");
+      throw new Error("The method " + t + " is not supported.");
   }
 }
-function d(e, i) {
-  return new Promise((s, a) => {
-    if (!i.apiKey) throw new Error("API Key not provided in configuration");
-    const t = new XMLHttpRequest();
-    t.onreadystatechange = function() {
+function c(t, a) {
+  return new Promise((s, n) => {
+    if (!a.apiKey) throw new Error("API Key not provided in configuration");
+    const e = new XMLHttpRequest();
+    e.onreadystatechange = function() {
       try {
-        if (t.readyState !== 4) return;
-        if (t.status === 202)
+        if (e.readyState !== 4) return;
+        if (e.status === 202)
           postResult({
             status: "success"
           }), s();
         else
-          throw new Error("Failed with status " + t.status);
-      } catch (r) {
-        a(r);
+          throw new Error("Failed with status " + e.status);
+      } catch (o) {
+        n(o);
       }
     };
-    const n = {
+    const i = {
       personalizations: [{
         to: [{
-          email: e.to_email,
-          name: e.to_name
+          email: t.to_email,
+          name: t.to_name
         }]
       }],
       from: {
-        email: e.from_email,
-        name: e.from_name
+        email: t.from_email,
+        name: t.from_name
       },
-      subject: e.subject,
+      subject: t.subject,
       content: [{
         type: "text/html",
-        value: e.content
+        value: t.content
       }]
     };
-    t.open("POST", "https://api.sendgrid.com/v3/mail/send"), t.setRequestHeader("Authorization", `Bearer ${i.apiKey}`), t.setRequestHeader("Content-Type", "application/json"), t.send(JSON.stringify(n));
+    e.open("POST", "https://api.sendgrid.com/v3/mail/send"), e.setRequestHeader("Authorization", `Bearer ${a.apiKey}`), e.setRequestHeader("Content-Type", "application/json"), e.send(JSON.stringify(i));
   });
 }
-function p(e) {
-  return new Promise((i, s) => {
-    if (!e.apiKey) throw new Error("API Key not provided in configuration");
-    const a = new XMLHttpRequest();
-    a.onreadystatechange = function() {
+function u(t, a) {
+  return new Promise((s, n) => {
+    if (!t.apiKey) throw new Error("API Key not provided in configuration");
+    const e = new XMLHttpRequest();
+    e.onreadystatechange = function() {
       try {
-        if (a.readyState !== 4) return;
-        if (a.status === 201) {
-          const t = JSON.parse(a.responseText);
+        if (e.readyState !== 4) return;
+        if (e.status === 201) {
+          const o = JSON.parse(e.responseText);
+          postResult({
+            batch_id: o.batch_id,
+            status: "created"
+          }), s();
+        } else
+          throw new Error("Failed with status " + e.status);
+      } catch (o) {
+        n(o);
+      }
+    }, e.open("POST", "https://api.sendgrid.com/v3/mail/batch"), e.setRequestHeader("Authorization", `Bearer ${t.apiKey}`), a.on_behalf_of && e.setRequestHeader("on-behalf-of", a.on_behalf_of);
+    const i = a.send_at ? { send_at: a.send_at } : {};
+    e.setRequestHeader("Content-Type", "application/json"), e.send(JSON.stringify(i));
+  });
+}
+function h(t, a) {
+  return new Promise((s, n) => {
+    if (!a.apiKey) throw new Error("API Key not provided in configuration");
+    if (!t.batch_id) throw new Error("Batch ID is required");
+    const e = new XMLHttpRequest();
+    e.onreadystatechange = function() {
+      try {
+        if (e.readyState !== 4) return;
+        if (e.status === 200)
           postResult({
             batch_id: t.batch_id,
-            status: "created"
-          }), i();
-        } else
-          throw new Error("Failed with status " + a.status);
-      } catch (t) {
-        s(t);
-      }
-    }, a.open("POST", "https://api.sendgrid.com/v3/mail/batch"), a.setRequestHeader("Authorization", `Bearer ${e.apiKey}`), a.send();
-  });
-}
-function u(e, i) {
-  return new Promise((s, a) => {
-    if (!i.apiKey) throw new Error("API Key not provided in configuration");
-    if (!e.batch_id) throw new Error("Batch ID is required");
-    const t = new XMLHttpRequest();
-    t.onreadystatechange = function() {
-      try {
-        if (t.readyState !== 4) return;
-        if (t.status === 200)
-          postResult({
-            batch_id: e.batch_id,
             status: "valid"
           }), s();
         else
-          throw new Error("Failed with status " + t.status);
-      } catch (n) {
-        a(n);
+          throw new Error("Failed with status " + e.status);
+      } catch (i) {
+        n(i);
       }
-    }, t.open("GET", `https://api.sendgrid.com/v3/mail/batch/${encodeURIComponent(e.batch_id)}`), t.setRequestHeader("Authorization", `Bearer ${i.apiKey}`), t.send();
+    }, e.open("GET", `https://api.sendgrid.com/v3/mail/batch/${encodeURIComponent(t.batch_id)}`), e.setRequestHeader("Authorization", `Bearer ${a.apiKey}`), t.on_behalf_of && e.setRequestHeader("on-behalf-of", t.on_behalf_of), e.send();
   });
 }
 //# sourceMappingURL=index.js.map
