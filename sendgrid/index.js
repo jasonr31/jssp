@@ -1,116 +1,88 @@
 metadata = {
   systemName: "com.k2.sendgrid",
-  displayName: "Twilio SendGrid",
-  description: "A service broker for sending emails using Twilio SendGrid.",
-  configuration: {
-    apiKey: {
-      displayName: "API Key",
-      type: "string",
-      required: !0
-    },
-    baseUrl: {
-      displayName: "Base URL",
-      type: "string",
-      required: !1
-    }
-  }
+  displayName: "SendGrid Mail Service",
+  description: "A service broker for SendGrid's Mail API v3."
 };
 ondescribe = async function({ configuration: e }) {
   postSchema({
     objects: {
-      email: {
-        displayName: "Email",
-        description: "Send emails using Twilio SendGrid",
+      mail: {
+        displayName: "Mail",
+        description: "Send emails through SendGrid",
         properties: {
-          to: {
-            displayName: "To",
-            type: "string",
-            description: "Recipient email address"
+          // Response properties
+          status: {
+            displayName: "Status",
+            description: "Send status",
+            type: "string"
           },
-          toName: {
-            displayName: "To Name",
-            type: "string",
-            description: "Recipient name"
+          // Input properties for mail send
+          from_email: {
+            displayName: "From Email",
+            description: "Sender email address",
+            type: "string"
           },
-          from: {
-            displayName: "From",
-            type: "string",
-            description: "Sender email address"
-          },
-          fromName: {
+          from_name: {
             displayName: "From Name",
-            type: "string",
-            description: "Sender name"
+            description: "Sender name",
+            type: "string"
+          },
+          to_email: {
+            displayName: "To Email",
+            description: "Recipient email address",
+            type: "string"
+          },
+          to_name: {
+            displayName: "To Name",
+            description: "Recipient name",
+            type: "string"
           },
           subject: {
             displayName: "Subject",
-            type: "string",
-            description: "Email subject"
+            description: "Email subject",
+            type: "string"
           },
-          contentHtml: {
-            displayName: "HTML Content",
-            type: "string",
-            description: "HTML content of the email"
-          },
-          contentText: {
-            displayName: "Text Content",
-            type: "string",
-            description: "Plain text content of the email"
-          },
-          cc: {
-            displayName: "CC",
-            type: "string",
-            description: "CC recipient email address"
-          },
-          ccName: {
-            displayName: "CC Name",
-            type: "string",
-            description: "CC recipient name"
-          },
-          bcc: {
-            displayName: "BCC",
-            type: "string",
-            description: "BCC recipient email address"
-          },
-          bccName: {
-            displayName: "BCC Name",
-            type: "string",
-            description: "BCC recipient name"
-          },
-          templateId: {
-            displayName: "Template ID",
-            type: "string",
-            description: "SendGrid template ID"
+          content: {
+            displayName: "Content",
+            description: "Email content (HTML)",
+            type: "string"
           }
         },
         methods: {
           send: {
             displayName: "Send Email",
             type: "execute",
-            inputs: ["to", "toName", "from", "fromName", "subject", "contentHtml", "contentText"],
-            requiredInputs: ["to", "from", "subject"],
-            outputs: ["statusCode"]
+            inputs: ["from_email", "from_name", "to_email", "to_name", "subject", "content"],
+            outputs: ["status"]
+          }
+        }
+      },
+      batch: {
+        displayName: "Batch",
+        description: "Manage email batch operations",
+        properties: {
+          batch_id: {
+            displayName: "Batch ID",
+            description: "The batch identifier",
+            type: "string"
           },
-          sendWithTemplate: {
-            displayName: "Send Email with Template",
-            type: "execute",
-            inputs: ["to", "toName", "from", "fromName", "templateId"],
-            requiredInputs: ["to", "from", "templateId"],
-            outputs: ["statusCode"]
+          status: {
+            displayName: "Status",
+            description: "Batch operation status",
+            type: "string"
+          }
+        },
+        methods: {
+          create: {
+            displayName: "Create Batch",
+            type: "create",
+            outputs: ["batch_id", "status"]
           },
-          sendWithCC: {
-            displayName: "Send Email with CC",
-            type: "execute",
-            inputs: ["to", "toName", "from", "fromName", "subject", "contentHtml", "contentText", "cc", "ccName"],
-            requiredInputs: ["to", "from", "subject", "cc"],
-            outputs: ["statusCode"]
-          },
-          sendWithBCC: {
-            displayName: "Send Email with BCC",
-            type: "execute",
-            inputs: ["to", "toName", "from", "fromName", "subject", "contentHtml", "contentText", "bcc", "bccName"],
-            requiredInputs: ["to", "from", "subject", "bcc"],
-            outputs: ["statusCode"]
+          validate: {
+            displayName: "Validate Batch",
+            type: "read",
+            inputs: ["batch_id"],
+            outputs: ["status"]
           }
         }
       }
@@ -119,130 +91,121 @@ ondescribe = async function({ configuration: e }) {
 };
 onexecute = async function({
   objectName: e,
-  methodName: a,
-  parameters: t,
-  properties: n,
-  configuration: o,
-  schema: s
+  methodName: s,
+  parameters: i,
+  properties: a,
+  configuration: t,
+  schema: n
 }) {
   switch (e) {
-    case "email":
-      await p(a, n, t, o);
+    case "mail":
+      await o(s, a, t);
+      break;
+    case "batch":
+      await c(s, a, t);
       break;
     default:
       throw new Error("The object " + e + " is not supported.");
   }
 };
-async function p(e, a, t, n) {
-  if (!n.apiKey)
-    throw new Error("SendGrid API Key is required");
+async function o(e, s, i) {
   switch (e) {
     case "send":
-      await r(a, n, !1, !1);
-      break;
-    case "sendWithTemplate":
-      await y(a, n);
-      break;
-    case "sendWithCC":
-      await r(a, n, !0, !1);
-      break;
-    case "sendWithBCC":
-      await r(a, n, !1, !0);
+      await d(s, i);
       break;
     default:
       throw new Error("The method " + e + " is not supported.");
   }
 }
-function d(e, a = !1) {
-  const t = [];
-  if (e.to || t.push("To email address is required"), e.from || t.push("From email address is required"), a ? e.templateId || t.push("Template ID is required") : (e.subject || t.push("Subject is required"), !e.contentHtml && !e.contentText && t.push("Either HTML or plain text content is required")), t.length > 0)
-    throw new Error(t.join(". "));
+async function c(e, s, i) {
+  switch (e) {
+    case "create":
+      await p(i);
+      break;
+    case "validate":
+      await u(s, i);
+      break;
+    default:
+      throw new Error("The method " + e + " is not supported.");
+  }
 }
-function r(e, a, t = !1, n = !1) {
-  return new Promise((o, s) => {
-    d(e);
-    const m = {
-      to: [{
-        email: e.to,
-        name: e.toName || void 0
-      }]
-    };
-    t && e.cc && (m.cc = [{
-      email: e.cc,
-      name: e.ccName || void 0
-    }]), n && e.bcc && (m.bcc = [{
-      email: e.bcc,
-      name: e.bccName || void 0
-    }]);
-    const c = {
-      personalizations: [m],
-      from: {
-        email: e.from,
-        name: e.fromName || void 0
-      },
-      subject: e.subject,
-      content: []
-    };
-    e.contentHtml && c.content.push({
-      type: "text/html",
-      value: e.contentHtml
-    }), e.contentText && c.content.push({
-      type: "text/plain",
-      value: e.contentText
-    });
-    const i = new XMLHttpRequest();
-    i.onreadystatechange = function() {
+function d(e, s) {
+  return new Promise((i, a) => {
+    if (!s.apiKey) throw new Error("API Key not provided in configuration");
+    const t = new XMLHttpRequest();
+    t.onreadystatechange = function() {
       try {
-        if (i.readyState !== 4) return;
-        postResult({
-          statusCode: i.status
-        }), l(i), o();
-      } catch (u) {
-        s(u);
+        if (t.readyState !== 4) return;
+        if (t.status === 202)
+          postResult({
+            status: "success"
+          }), i();
+        else
+          throw new Error("Failed with status " + t.status);
+      } catch (r) {
+        a(r);
       }
-    }, i.open("POST", "https://api.sendgrid.com/v3/mail/send"), i.setRequestHeader("Authorization", "Bearer " + a.apiKey), i.setRequestHeader("Content-Type", "application/json"), i.send(JSON.stringify(c));
-  });
-}
-function y(e, a) {
-  return new Promise((t, n) => {
-    d(e, !0);
-    const o = {
+    };
+    const n = {
       personalizations: [{
         to: [{
-          email: e.to,
-          name: e.toName || void 0
-        }],
-        dynamic_template_data: e.templateData || {}
+          email: e.to_email,
+          name: e.to_name
+        }]
       }],
       from: {
-        email: e.from,
-        name: e.fromName || void 0
+        email: e.from_email,
+        name: e.from_name
       },
-      template_id: e.templateId
-    }, s = new XMLHttpRequest();
-    s.onreadystatechange = function() {
-      try {
-        if (s.readyState !== 4) return;
-        postResult({
-          statusCode: s.status
-        }), l(s), t();
-      } catch (m) {
-        n(m);
-      }
-    }, s.open("POST", "https://api.sendgrid.com/v3/mail/send"), s.setRequestHeader("Authorization", "Bearer " + a.apiKey), s.setRequestHeader("Content-Type", "application/json"), s.send(JSON.stringify(o));
+      subject: e.subject,
+      content: [{
+        type: "text/html",
+        value: e.content
+      }]
+    };
+    t.open("POST", "https://api.sendgrid.com/v3/mail/send"), t.setRequestHeader("Authorization", `Bearer ${s.apiKey}`), t.setRequestHeader("Content-Type", "application/json"), t.send(JSON.stringify(n));
   });
 }
-function l(e) {
-  if (e.status >= 200 && e.status < 300)
-    return;
-  let a = `Request failed with status ${e.status}`;
-  try {
-    const t = e.responseText ? JSON.parse(e.responseText) : null;
-    t && t.errors && t.errors.length > 0 && (a = t.errors.map((n) => n.message).join(". "));
-  } catch (t) {
-    a += `. Unable to parse error response: ${t.message}`;
-  }
-  throw new Error(a);
+function p(e) {
+  return new Promise((s, i) => {
+    if (!e.apiKey) throw new Error("API Key not provided in configuration");
+    const a = new XMLHttpRequest();
+    a.onreadystatechange = function() {
+      try {
+        if (a.readyState !== 4) return;
+        if (a.status === 201) {
+          const t = JSON.parse(a.responseText);
+          postResult({
+            batch_id: t.batch_id,
+            status: "created"
+          }), s();
+        } else
+          throw new Error("Failed with status " + a.status);
+      } catch (t) {
+        i(t);
+      }
+    }, a.open("POST", "https://api.sendgrid.com/v3/mail/batch"), a.setRequestHeader("Authorization", `Bearer ${e.apiKey}`), a.send();
+  });
+}
+function u(e, s) {
+  return new Promise((i, a) => {
+    if (!s.apiKey) throw new Error("API Key not provided in configuration");
+    if (!e.batch_id) throw new Error("Batch ID is required");
+    const t = new XMLHttpRequest();
+    t.onreadystatechange = function() {
+      try {
+        if (t.readyState !== 4) return;
+        if (t.status === 200)
+          postResult({
+            batch_id: e.batch_id,
+            status: "valid"
+          }), i();
+        else
+          throw new Error("Failed with status " + t.status);
+      } catch (n) {
+        a(n);
+      }
+    }, t.open("GET", `https://api.sendgrid.com/v3/mail/batch/${encodeURIComponent(e.batch_id)}`), t.setRequestHeader("Authorization", `Bearer ${s.apiKey}`), t.send();
+  });
 }
 //# sourceMappingURL=index.js.map
-
