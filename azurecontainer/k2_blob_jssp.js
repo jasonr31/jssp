@@ -1,5 +1,3 @@
-import '@k2oss/k2-broker-core';
-
 metadata = {
     systemName: "com.k2.azureblobstorage",
     displayName: "Azure Blob Storage API",
@@ -32,7 +30,7 @@ metadata = {
     }
 };
 
-ondescribe = async function ({ configuration }): Promise<void> {
+ondescribe = async function ({ configuration }) {
     postSchema({
         objects: {
             ReadmeFile: {
@@ -100,9 +98,9 @@ ondescribe = async function ({ configuration }): Promise<void> {
             }
         }
     });
-}
+};
 
-onexecute = async function ({ objectName, methodName, parameters, properties, configuration, schema }): Promise<void> {
+onexecute = async function ({ objectName, methodName, parameters, properties, configuration, schema }) {
     switch (objectName) {
         case "ReadmeFile":
             await onexecuteReadmeFile(methodName, parameters, properties, configuration);
@@ -111,54 +109,54 @@ onexecute = async function ({ objectName, methodName, parameters, properties, co
             await onexecuteCustomFile(methodName, parameters, properties, configuration);
             break;
         default:
-            throw new Error(`Object ${objectName} is not supported.`);
+            throw new Error("Object " + objectName + " is not supported.");
     }
-}
+};
 
-async function onexecuteReadmeFile(methodName: string, parameters: SingleRecord, properties: SingleRecord, configuration: SingleRecord): Promise<void> {
+async function onexecuteReadmeFile(methodName, parameters, properties, configuration) {
     switch (methodName) {
         case "GetReadmeFile":
             await getReadmeFile(configuration);
             break;
         default:
-            throw new Error(`Method ${methodName} is not supported for ReadmeFile object.`);
+            throw new Error("Method " + methodName + " is not supported for ReadmeFile object.");
     }
 }
 
-async function onexecuteCustomFile(methodName: string, parameters: SingleRecord, properties: SingleRecord, configuration: SingleRecord): Promise<void> {
+async function onexecuteCustomFile(methodName, parameters, properties, configuration) {
     switch (methodName) {
         case "DownloadFile":
             await downloadFile(properties, configuration);
             break;
         default:
-            throw new Error(`Method ${methodName} is not supported for CustomFile object.`);
+            throw new Error("Method " + methodName + " is not supported for CustomFile object.");
     }
 }
 
-async function getReadmeFile(configuration: SingleRecord): Promise<void> {
-    const host = configuration["host"];
-    const basePath = configuration["basePath"];
-    const apiVersion = configuration["apiVersion"];
-    const oauthResourceId = configuration["oauthResourceId"];
+async function getReadmeFile(configuration) {
+    var host = configuration["host"];
+    var basePath = configuration["basePath"];
+    var apiVersion = configuration["apiVersion"];
+    var oauthResourceId = configuration["oauthResourceId"];
 
     // Build URL from Swagger definition
-    const url = `https://${host}${basePath}/readme.txt`;
+    var url = "https://" + host + basePath + "/readme.txt";
 
     try {
         // Get OAuth token from K2's OAuth resource
-        const token = await getOAuthToken(oauthResourceId);
+        var token = await getOAuthToken(oauthResourceId);
 
-        const response = await fetch(url, {
+        var response = await fetch(url, {
             method: "GET",
             headers: {
-                "Authorization": `Bearer ${token}`,
+                "Authorization": "Bearer " + token,
                 "Accept": "text/plain",
                 "x-ms-version": apiVersion
             }
         });
 
         if (response.ok) {
-            const content = await response.text();
+            var content = await response.text();
             postResult({
                 content: content,
                 success: true,
@@ -166,7 +164,7 @@ async function getReadmeFile(configuration: SingleRecord): Promise<void> {
                 statusCode: response.status
             });
         } else {
-            let errorMsg = response.statusText || "File not found";
+            var errorMsg = response.statusText || "File not found";
             if (response.status === 404) {
                 errorMsg = "File not found";
             } else if (response.status === 401) {
@@ -192,12 +190,12 @@ async function getReadmeFile(configuration: SingleRecord): Promise<void> {
     }
 }
 
-async function downloadFile(properties: SingleRecord, configuration: SingleRecord): Promise<void> {
-    const host = configuration["host"];
-    const basePath = configuration["basePath"];
-    const apiVersion = configuration["apiVersion"];
-    const oauthResourceId = configuration["oauthResourceId"];
-    let fileName = properties["fileName"] as string;
+async function downloadFile(properties, configuration) {
+    var host = configuration["host"];
+    var basePath = configuration["basePath"];
+    var apiVersion = configuration["apiVersion"];
+    var oauthResourceId = configuration["oauthResourceId"];
+    var fileName = properties["fileName"];
 
     // Ensure fileName doesn't start with /
     if (fileName.startsWith('/')) {
@@ -205,23 +203,23 @@ async function downloadFile(properties: SingleRecord, configuration: SingleRecor
     }
 
     // Build URL
-    const url = `https://${host}${basePath}/${fileName}`;
+    var url = "https://" + host + basePath + "/" + fileName;
 
     try {
         // Get OAuth token from K2's OAuth resource
-        const token = await getOAuthToken(oauthResourceId);
+        var token = await getOAuthToken(oauthResourceId);
 
-        const response = await fetch(url, {
+        var response = await fetch(url, {
             method: "GET",
             headers: {
-                "Authorization": `Bearer ${token}`,
+                "Authorization": "Bearer " + token,
                 "Accept": "text/plain",
                 "x-ms-version": apiVersion
             }
         });
 
         if (response.ok) {
-            const content = await response.text();
+            var content = await response.text();
             postResult({
                 fileName: properties["fileName"],
                 content: content,
@@ -230,7 +228,7 @@ async function downloadFile(properties: SingleRecord, configuration: SingleRecor
                 statusCode: response.status
             });
         } else {
-            let errorMsg = response.statusText || "File not found";
+            var errorMsg = response.statusText || "File not found";
             if (response.status === 404) {
                 errorMsg = "File not found";
             } else if (response.status === 401) {
@@ -258,7 +256,7 @@ async function downloadFile(properties: SingleRecord, configuration: SingleRecor
     }
 }
 
-async function getOAuthToken(resourceId: string): Promise<string> {
+async function getOAuthToken(resourceId) {
     // K2 Cloud provides OAuth tokens through the K2 OAuth resource mechanism
     // The token is retrieved using the resource ID configured in the service instance
     // This is a placeholder - K2 handles OAuth token retrieval internally
