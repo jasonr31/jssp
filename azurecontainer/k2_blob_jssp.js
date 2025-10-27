@@ -1,121 +1,138 @@
-const y = "https://mrohstoragetechrefdev01.blob.core.windows.net", f = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", u = "file", p = "content", d = "fileName", a = "path", h = "download";
-ondescribe = async function({ configuration: t }) {
-  const o = {
-    objects: {
-      [u]: {
-        displayName: "File",
-        description: "Download files from Azure Blob Storage",
-        properties: {
-          [p]: {
-            displayName: "File Content",
-            type: "string"
-          },
-          [d]: {
-            displayName: "File Name",
-            type: "string"
-          }
-        },
-        methods: {
-          [h]: {
-            displayName: "Download File",
-            type: "read",
-            outputs: [p, d],
-            parameters: {
-              [a]: {
-                displayName: "File Path",
-                description: "Path to the file in blob storage",
-                type: "string"
-              }
-            },
-            requiredParameters: [a]
-          }
-        }
-      }
+metadata = {
+    systemName: "com.k2.mrohstorage",
+    displayName: "MROH File Download Broker",
+    description: "A broker for downloading files from MROH Azure Blob Storage.",
+    serviceAuthentication: {
+        type: "OAuth",
+        resource: "Azure Blob Files MROH - Client"
     },
-    configuration: {
-      serviceKeyProperties: {
+    serviceKeyProperties: {
         "x-ms-version": {
-          displayName: "Azure Storage API Version",
-          description: "Override the x-ms-version header sent to Azure Blob Storage",
-          type: "string",
-          default: "2020-04-08"
+            displayName: "Azure Storage API Version",
+            description: "Override the x-ms-version header sent to Azure Blob Storage",
+            type: "string",
+            default: "2020-04-08"
         }
-      }
     }
-  };
-  postSchema(o);
 };
-onexecute = async function({
-  objectName: t,
-  methodName: o,
-  parameters: i,
-  properties: e,
-  configuration: s
-}) {
-  switch (t) {
-    case u:
-      await m(o, i, e, s);
-      break;
-    default:
-      throw new Error("The object " + t + " is not supported.");
-  }
+
+const baseUri = "https://mrohstoragetechrefdev01.blob.core.windows.net";
+const basePath = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References";
+
+const File = "file";
+const FileContent = "content";
+const FileName = "fileName";
+const FilePath = "path";
+const FileDownload = "download";
+
+ondescribe = async function ({ configuration }) {
+    postSchema({
+        objects: {
+            [File]: {
+                displayName: "File",
+                description: "Download files from Azure Blob Storage",
+                properties: {
+                    [FileContent]: { displayName: "File Content", type: "string" },
+                    [FileName]: { displayName: "File Name", type: "string" }
+                },
+                methods: {
+                    [FileDownload]: {
+                        displayName: "Download File",
+                        type: "read",
+                        outputs: [FileContent, FileName],
+                        parameters: {
+                            [FilePath]: {
+                                displayName: "File Path",
+                                description: "Path to the file in blob storage",
+                                type: "string"
+                            }
+                        },
+                        requiredParameters: [FilePath]
+                    }
+                }
+            }
+        },
+        configuration: {
+            serviceKeyProperties: {
+                "x-ms-version": {
+                    displayName: "Azure Storage API Version",
+                    description: "Override the x-ms-version header sent to Azure Blob Storage",
+                    type: "string",
+                    default: "2020-04-08"
+                }
+            }
+        }
+    });
 };
-async function m(t, o, i, e) {
-  switch (t) {
-    case h:
-      await w(o, i, e);
-      break;
-    default:
-      throw new Error("The method " + t + " is not supported.");
-  }
-}
-function w(t, o, i) {
-  return new Promise((e, s) => {
-    if (typeof t[a] != "string") {
-      s(new Error('parameters["path"] is not of type string'));
-      return;
+
+onexecute = async function ({ objectName, methodName, parameters, properties, configuration }) {
+    switch (objectName) {
+        case File:
+            await onexecuteFile(methodName, parameters, properties, configuration);
+            break;
+        default:
+            throw new Error("The object " + objectName + " is not supported.");
     }
-    t[a], v(t, o, i, (r, n) => {
-      if (r) {
-        s(r);
-        return;
-      }
-      postResult(n), e();
+};
+
+async function onexecuteFile(methodName, parameters, properties, configuration) {
+    switch (methodName) {
+        case FileDownload:
+            await onexecuteFileDownload(parameters, properties, configuration);
+            break;
+        default:
+            throw new Error("The method " + methodName + " is not supported.");
+    }
+}
+
+function onexecuteFileDownload(parameters, properties, configuration) {
+    return new Promise((resolve, reject) => {
+        if (typeof parameters[FilePath] !== "string") {
+            throw new Error('parameters["path"] is not of type string');
+        }
+
+        const filePath = parameters[FilePath];
+        const url = `${baseUri}${basePath}/${filePath}`;
+
+        ExecuteRequest(url, "", "GET", configuration, (error, responseText) => {
+            if (error) return reject(error);
+
+            const fileName = filePath.includes('/') ? filePath.split('/').pop() || filePath : filePath;
+
+            postResult({
+                [FileContent]: responseText,
+                [FileName]: fileName
+            });
+            resolve();
+        });
     });
-  });
 }
-function v(t, o, i, e) {
-  const s = t[a], r = `${y}${f}/${s}`;
-  x(r, "", "GET", i, (n, c) => {
-    if (n) {
-      e(n);
-      return;
+
+function ExecuteRequest(url, data, requestType, configuration, cb) {
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function () {
+        try {
+            if (xhr.readyState !== 4) return;
+            if (xhr.status !== 200) {
+                throw new Error("Failed with status " + xhr.status);
+            }
+
+            cb(null, xhr.responseText);
+        } catch (e) {
+            cb(e);
+        }
+    };
+
+    xhr.open(requestType, url);
+
+    let xMsVersion = "2020-04-08";
+    if (configuration && typeof configuration["xMsVersion"] === "string") {
+        xMsVersion = configuration["xMsVersion"];
     }
-    const l = s.includes("/") && s.split("/").pop() || s;
-    e(null, {
-      [p]: c,
-      [d]: l
-    });
-  });
+
+    xhr.setRequestHeader("x-ms-version", xMsVersion);
+
+    // K2 will automatically inject the Authorization header with Bearer token
+    xhr.send(data);
 }
-function x(t, o, i, e, s) {
-  const r = new XMLHttpRequest();
-  r.onreadystatechange = function() {
-    try {
-      if (r.readyState !== 4) return;
-      if (r.status !== 200)
-        throw new Error("Failed with status " + r.status);
-      s(null, r.responseText);
-    } catch (l) {
-      s(l);
-    }
-  }, r.open(i, t);
-  let n;
-  try {
-    e && typeof e.xMsVersion == "string" ? n = e.xMsVersion : e && e.serviceKeyProperties && typeof e.serviceKeyProperties["x-ms-version"] == "string" ? n = e.serviceKeyProperties["x-ms-version"] : e && e.serviceProperties && typeof e.serviceProperties["x-ms-version"] == "string" && (n = e.serviceProperties["x-ms-version"]);
-  } catch {
-  }
-  const c = n || "2020-04-08";
-  r.setRequestHeader("x-ms-version", c), r.send(o);
-}
-//# sourceMappingURL=index.js.map
