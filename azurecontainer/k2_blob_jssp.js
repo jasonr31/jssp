@@ -1,1 +1,120 @@
-metadata={systemName:"com.k2.mrohstorage",displayName:"MROH File Download Broker",description:"A broker for downloading files from MROH Azure Blob Storage."};const e="https://mrohstoragetechrefdev01.blob.core.windows.net",t="/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References",r="file",o="content",s="fileName",i="path",n="download";ondescribe=async function({configuration:e}){postSchema({objects:{[r]:{displayName:"File",description:"Download files from Azure Blob Storage",properties:{[o]:{displayName:"File Content",type:"string"},[s]:{displayName:"File Name",type:"string"}},methods:{[n]:{displayName:"Download File",type:"read",outputs:[o,s],parameters:{[i]:{displayName:"File Path",description:"Path to the file in blob storage",type:"string"}},requiredParameters:[i]}}}}})},onexecute=async function({objectName:a,methodName:p,parameters:c,properties:l,configuration:d}){if(a!==r)throw new Error("The object "+a+" is not supported.");await async function(r,a,p,c){if(r!==n)throw new Error("The method "+r+" is not supported.");await function(r,n,a){return new Promise(((n,p)=>{if("string"!=typeof r[i])throw new Error('parameters["path"] is not of type string');r[i],function(r,n,a,p){const c=r[i],l=`${e}${t}/${c}`;!function(e,t,r,o,s){var i=new XMLHttpRequest;let n;i.onreadystatechange=function(){try{if(4!==i.readyState)return;if(200!==i.status)throw new Error("Failed with status "+i.status);s(null,i.responseText)}catch(e){s(e)}},i.open(r,e);try{o&&"string"==typeof o.xMsVersion?n=o.xMsVersion:o&&o.serviceKeyProperties&&"string"==typeof o.serviceKeyProperties["x-ms-version"]?n=o.serviceKeyProperties["x-ms-version"]:o&&o.serviceProperties&&"string"==typeof o.serviceProperties["x-ms-version"]&&(n=o.serviceProperties["x-ms-version"])}catch{}const a=n||"2020-04-08";i.setRequestHeader("x-ms-version",a),i.send(t)}(l,"","GET",a,((e,t)=>{if(e)return p(e);const r=c.includes("/")&&c.split("/").pop()||c;p(null,{[o]:t,[s]:r})}))}(r,0,a,((e,t)=>{if(e)return p(e);postResult(t),n()}))}))}(a,0,c)}(p,c,0,d)};
+metadata = {
+  systemName: "com.k2.mrohstorage",
+  displayName: "MROH File Download Broker",
+  description: "A broker for downloading files from MROH Azure Blob Storage."
+};
+const m = "https://mrohstoragetechrefdev01.blob.core.windows.net", f = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", h = "file", p = "content", d = "fileName", a = "path", u = "download";
+ondescribe = async function({ configuration: t }) {
+  const o = {
+    objects: {
+      [h]: {
+        displayName: "File",
+        description: "Download files from Azure Blob Storage",
+        properties: {
+          [p]: {
+            displayName: "File Content",
+            type: "string"
+          },
+          [d]: {
+            displayName: "File Name",
+            type: "string"
+          }
+        },
+        methods: {
+          [u]: {
+            displayName: "Download File",
+            type: "read",
+            outputs: [p, d],
+            parameters: {
+              [a]: {
+                displayName: "File Path",
+                description: "Path to the file in blob storage",
+                type: "string"
+              }
+            },
+            requiredParameters: [a]
+          }
+        }
+      }
+    },
+    // Expose service key properties so they appear in the K2 Service Instance UI.
+    // K2 will surface these for users to set when creating a service instance.
+    configuration: {
+      serviceKeyProperties: {
+        "x-ms-version": {
+          displayName: "Azure Storage API Version (x-ms-version)",
+          description: "Optional override for the x-ms-version header sent to Azure Storage",
+          type: "string",
+          default: "2020-04-08"
+        }
+      }
+    }
+  };
+  postSchema(o);
+};
+onexecute = async function({
+  objectName: t,
+  methodName: o,
+  parameters: i,
+  properties: e,
+  configuration: r
+}) {
+  switch (t) {
+    case h:
+      await y(o, i, e, r);
+      break;
+    default:
+      throw new Error("The object " + t + " is not supported.");
+  }
+};
+async function y(t, o, i, e) {
+  switch (t) {
+    case u:
+      await w(o, i, e);
+      break;
+    default:
+      throw new Error("The method " + t + " is not supported.");
+  }
+}
+function w(t, o, i) {
+  return new Promise((e, r) => {
+    if (typeof t[a] != "string")
+      throw new Error('parameters["path"] is not of type string');
+    t[a], v(t, o, i, (s, n) => {
+      if (s) return r(s);
+      postResult(n), e();
+    });
+  });
+}
+function v(t, o, i, e) {
+  const r = t[a], s = `${m}${f}/${r}`;
+  x(s, "", "GET", i, (n, c) => {
+    if (n) return e(n);
+    const l = r.includes("/") && r.split("/").pop() || r;
+    e(null, {
+      [p]: c,
+      [d]: l
+    });
+  });
+}
+function x(t, o, i, e, r) {
+  var s = new XMLHttpRequest();
+  s.onreadystatechange = function() {
+    try {
+      if (s.readyState !== 4) return;
+      if (s.status !== 200)
+        throw new Error("Failed with status " + s.status);
+      r(null, s.responseText);
+    } catch (l) {
+      r(l);
+    }
+  }, s.open(i, t);
+  let n;
+  try {
+    e && typeof e.xMsVersion == "string" ? n = e.xMsVersion : e && e.serviceKeyProperties && typeof e.serviceKeyProperties["x-ms-version"] == "string" ? n = e.serviceKeyProperties["x-ms-version"] : e && e.serviceProperties && typeof e.serviceProperties["x-ms-version"] == "string" && (n = e.serviceProperties["x-ms-version"]);
+  } catch {
+  }
+  const c = n || "2020-04-08";
+  s.setRequestHeader("x-ms-version", c), s.send(o);
+}
+//# sourceMappingURL=index.js.map
