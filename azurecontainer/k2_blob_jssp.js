@@ -6,7 +6,7 @@ metadata = {
         type: "OAuth",
         resource: "Azure Blob Files MROH - Client"
     },
-    serviceKeyProperties: {
+    configuration: {
         "x-ms-version": {
             displayName: "Azure Storage API Version",
             description: "Override the x-ms-version header sent to Azure Blob Storage",
@@ -26,14 +26,20 @@ const FilePath = "path";
 const FileDownload = "download";
 
 ondescribe = async function ({ configuration }) {
-    postSchema({
+    const schema = {
         objects: {
             [File]: {
                 displayName: "File",
                 description: "Download files from Azure Blob Storage",
                 properties: {
-                    [FileContent]: { displayName: "File Content", type: "string" },
-                    [FileName]: { displayName: "File Name", type: "string" }
+                    [FileContent]: {
+                        displayName: "File Content",
+                        type: "string"
+                    },
+                    [FileName]: {
+                        displayName: "File Name",
+                        type: "string"
+                    }
                 },
                 methods: {
                     [FileDownload]: {
@@ -51,18 +57,10 @@ ondescribe = async function ({ configuration }) {
                     }
                 }
             }
-        },
-        configuration: {
-            serviceKeyProperties: {
-                "x-ms-version": {
-                    displayName: "Azure Storage API Version",
-                    description: "Override the x-ms-version header sent to Azure Blob Storage",
-                    type: "string",
-                    default: "2020-04-08"
-                }
-            }
         }
-    });
+    };
+
+    postSchema(schema);
 };
 
 onexecute = async function ({ objectName, methodName, parameters, properties, configuration }) {
@@ -92,18 +90,26 @@ function onexecuteFileDownload(parameters, properties, configuration) {
         }
 
         const filePath = parameters[FilePath];
-        const url = `${baseUri}${basePath}/${filePath}`;
-
-        ExecuteRequest(url, "", "GET", configuration, (error, responseText) => {
+        DownloadFile(parameters, properties, configuration, (error, result) => {
             if (error) return reject(error);
-
-            const fileName = filePath.includes('/') ? filePath.split('/').pop() || filePath : filePath;
-
-            postResult({
-                [FileContent]: responseText,
-                [FileName]: fileName
-            });
+            postResult(result);
             resolve();
+        });
+    });
+}
+
+function DownloadFile(parameters, properties, configuration, cb) {
+    const filePath = parameters[FilePath];
+    const url = `${baseUri}${basePath}/${filePath}`;
+
+    ExecuteRequest(url, "", "GET", configuration, (error, responseText) => {
+        if (error) return cb(error);
+
+        const fileName = filePath.includes('/') ? filePath.split('/').pop() || filePath : filePath;
+
+        cb(null, {
+            [FileContent]: responseText,
+            [FileName]: fileName
         });
     });
 }
@@ -126,13 +132,17 @@ function ExecuteRequest(url, data, requestType, configuration, cb) {
 
     xhr.open(requestType, url);
 
-    let xMsVersion = "2020-04-08";
-    if (configuration && typeof configuration["xMsVersion"] === "string") {
-        xMsVersion = configuration["xMsVersion"];
+    let xMsVersion;
+    try {
+        if (configuration && typeof configuration["x-ms-version"] === "string") {
+            xMsVersion = configuration["x-ms-version"];
+        }
+    } catch (e) {
+        // ignore and fall back to default
     }
 
-    xhr.setRequestHeader("x-ms-version", xMsVersion);
+    const headerValue = xMsVersion || "2020-04-08";
+    xhr.setRequestHeader("x-ms-version", headerValue);
 
-    // K2 will automatically inject the Authorization header with Bearer token
     xhr.send(data);
 }
