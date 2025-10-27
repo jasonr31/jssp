@@ -10,15 +10,15 @@ metadata = {
     }
   }
 };
-const m = "https://mrohstoragetechrefdev01.blob.core.windows.net", y = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", u = "file", c = "content", d = "fileName", a = "path", h = "download";
+const m = "https://mrohstoragetechrefdev01.blob.core.windows.net", y = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", u = "file", p = "content", d = "fileName", a = "path", h = "download";
 ondescribe = async function({ configuration: t }) {
   const o = {
     objects: {
       [u]: {
         displayName: "File",
-        description: "Download files from Azure Blob Storage",
+        description: "Download file content from Azure Blob Storage",
         properties: {
-          [c]: {
+          [p]: {
             displayName: "File Content",
             type: "string"
           },
@@ -31,7 +31,7 @@ ondescribe = async function({ configuration: t }) {
           [h]: {
             displayName: "Download File",
             type: "read",
-            outputs: [c, d],
+            outputs: [p, d],
             parameters: {
               [a]: {
                 displayName: "File Path",
@@ -95,18 +95,18 @@ function w(t, o, i) {
 }
 function v(t, o, i, e) {
   const r = t[a], s = `${m}${y}/${r}`;
-  x(s, "", "GET", i, (n, p) => {
+  x(s, "", "GET", i, (n, c) => {
     if (n) return e(n);
     const l = r.includes("/") && r.split("/").pop() || r;
     e(null, {
-      [c]: p,
+      [p]: c,
       [d]: l
     });
   });
 }
 function x(t, o, i, e, r) {
   var s = new XMLHttpRequest();
-  s.onreadystatechange = function() {
+  s.withCredentials = !0, s.onreadystatechange = function() {
     try {
       if (s.readyState !== 4) return;
       if (s.status !== 200)
@@ -121,7 +121,7 @@ function x(t, o, i, e, r) {
     e && typeof e.xMsVersion == "string" ? n = e.xMsVersion : e && e.serviceKeyProperties && typeof e.serviceKeyProperties["x-ms-version"] == "string" ? n = e.serviceKeyProperties["x-ms-version"] : e && e.serviceProperties && typeof e.serviceProperties["x-ms-version"] == "string" && (n = e.serviceProperties["x-ms-version"]);
   } catch {
   }
-  const p = n || "2020-04-08";
-  s.setRequestHeader("x-ms-version", p), s.send(o);
+  const c = n || "2020-04-08";
+  s.setRequestHeader("x-ms-version", c), s.send(o);
 }
 //# sourceMappingURL=index.js.map
