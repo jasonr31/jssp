@@ -1,16 +1,4 @@
-metadata = {
-  systemName: "com.k2.mrohstorage",
-  displayName: "MROH File Download Broker",
-  description: "A broker for downloading files from MROH Azure Blob Storage.",
-  configuration: {
-    "x-ms-version": {
-      displayName: "Azure Storage API Version",
-      type: "string",
-      value: "2020-04-08"
-    }
-  }
-};
-const m = "https://mrohstoragetechrefdev01.blob.core.windows.net", y = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", u = "file", c = "content", d = "fileName", a = "path", h = "download";
+const y = "https://mrohstoragetechrefdev01.blob.core.windows.net", f = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", u = "file", p = "content", d = "fileName", a = "path", h = "download";
 ondescribe = async function({ configuration: t }) {
   const o = {
     objects: {
@@ -18,7 +6,7 @@ ondescribe = async function({ configuration: t }) {
         displayName: "File",
         description: "Download files from Azure Blob Storage",
         properties: {
-          [c]: {
+          [p]: {
             displayName: "File Content",
             type: "string"
           },
@@ -31,7 +19,7 @@ ondescribe = async function({ configuration: t }) {
           [h]: {
             displayName: "Download File",
             type: "read",
-            outputs: [c, d],
+            outputs: [p, d],
             parameters: {
               [a]: {
                 displayName: "File Path",
@@ -44,13 +32,11 @@ ondescribe = async function({ configuration: t }) {
         }
       }
     },
-    // Expose service key properties so they appear in the K2 Service Instance UI.
-    // K2 will surface these for users to set when creating a service instance.
     configuration: {
       serviceKeyProperties: {
         "x-ms-version": {
-          displayName: "Azure Storage API Version (x-ms-version)",
-          description: "Optional override for the x-ms-version header sent to Azure Storage",
+          displayName: "Azure Storage API Version",
+          description: "Override the x-ms-version header sent to Azure Blob Storage",
           type: "string",
           default: "2020-04-08"
         }
@@ -64,17 +50,17 @@ onexecute = async function({
   methodName: o,
   parameters: i,
   properties: e,
-  configuration: r
+  configuration: s
 }) {
   switch (t) {
     case u:
-      await f(o, i, e, r);
+      await m(o, i, e, s);
       break;
     default:
       throw new Error("The object " + t + " is not supported.");
   }
 };
-async function f(t, o, i, e) {
+async function m(t, o, i, e) {
   switch (t) {
     case h:
       await w(o, i, e);
@@ -84,44 +70,52 @@ async function f(t, o, i, e) {
   }
 }
 function w(t, o, i) {
-  return new Promise((e, r) => {
-    if (typeof t[a] != "string")
-      throw new Error('parameters["path"] is not of type string');
-    t[a], v(t, o, i, (s, n) => {
-      if (s) return r(s);
+  return new Promise((e, s) => {
+    if (typeof t[a] != "string") {
+      s(new Error('parameters["path"] is not of type string'));
+      return;
+    }
+    t[a], v(t, o, i, (r, n) => {
+      if (r) {
+        s(r);
+        return;
+      }
       postResult(n), e();
     });
   });
 }
 function v(t, o, i, e) {
-  const r = t[a], s = `${m}${y}/${r}`;
-  x(s, "", "GET", i, (n, p) => {
-    if (n) return e(n);
-    const l = r.includes("/") && r.split("/").pop() || r;
+  const s = t[a], r = `${y}${f}/${s}`;
+  x(r, "", "GET", i, (n, c) => {
+    if (n) {
+      e(n);
+      return;
+    }
+    const l = s.includes("/") && s.split("/").pop() || s;
     e(null, {
-      [c]: p,
+      [p]: c,
       [d]: l
     });
   });
 }
-function x(t, o, i, e, r) {
-  var s = new XMLHttpRequest();
-  s.onreadystatechange = function() {
+function x(t, o, i, e, s) {
+  const r = new XMLHttpRequest();
+  r.onreadystatechange = function() {
     try {
-      if (s.readyState !== 4) return;
-      if (s.status !== 200)
-        throw new Error("Failed with status " + s.status);
-      r(null, s.responseText);
+      if (r.readyState !== 4) return;
+      if (r.status !== 200)
+        throw new Error("Failed with status " + r.status);
+      s(null, r.responseText);
     } catch (l) {
-      r(l);
+      s(l);
     }
-  }, s.open(i, t);
+  }, r.open(i, t);
   let n;
   try {
     e && typeof e.xMsVersion == "string" ? n = e.xMsVersion : e && e.serviceKeyProperties && typeof e.serviceKeyProperties["x-ms-version"] == "string" ? n = e.serviceKeyProperties["x-ms-version"] : e && e.serviceProperties && typeof e.serviceProperties["x-ms-version"] == "string" && (n = e.serviceProperties["x-ms-version"]);
   } catch {
   }
-  const p = n || "2020-04-08";
-  s.setRequestHeader("x-ms-version", p), s.send(o);
+  const c = n || "2020-04-08";
+  r.setRequestHeader("x-ms-version", c), r.send(o);
 }
 //# sourceMappingURL=index.js.map
