@@ -6,12 +6,12 @@ metadata = {
     storageAccountUrl: {
       displayName: "Storage Account URL",
       type: "string",
-      value: "https://mrohstoragetechrefdev01.blob.core.windows.net"
+      value: "Replace with Base URI."
     },
     containerPath: {
       displayName: "Container Path",
       type: "string",
-      value: "/mrohstoragetechrefdev01/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References"
+      value: "Replace with container path."
     },
     "x-ms-version": {
       displayName: "Azure Storage API Version",
