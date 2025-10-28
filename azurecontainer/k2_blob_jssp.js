@@ -11,7 +11,7 @@ metadata = {
     containerPath: {
       displayName: "Container Path",
       type: "string",
-      value: "Replace with container path."
+      value: "Replace with container path, but exclude the file name."
     },
     "x-ms-version": {
       displayName: "Azure Storage API Version",
