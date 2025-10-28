@@ -83,43 +83,52 @@ async function handleFileObject(methodName, parameters, properties, configuratio
   }
 }
 
-async function downloadFile(parameters, properties, configuration) {
-  if (typeof parameters.path !== "string") {
-    throw new Error('parameters["path"] is not of type string');
-  }
-
-  const storageUrl = configuration.storageAccountUrl || "https://mrohstoragetechrefdev01.blob.core.windows.net";
-  const containerPath = configuration.containerPath || "/mrohstoragetechrefdev01/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References";
-  const filePath = parameters.path;
-  const fullUrl = storageUrl + containerPath + "/" + filePath;
-  
-  // Get API version from configuration
-  const apiVersion = configuration["x-ms-version"] || "2020-04-08";
-  
-  try {
-    // Use K2's HTTP request capabilities
-    const response = await fetch(fullUrl, {
-      method: "GET",
-      headers: {
-        "x-ms-version": apiVersion
-      }
-    });
-    
-    if (!response.ok) {
-      throw new Error("Failed to download file: " + response.status + " " + response.statusText);
+function downloadFile(parameters, properties, configuration) {
+  return new Promise(function(resolve, reject) {
+    if (typeof parameters.path !== "string") {
+      reject(new Error('parameters["path"] is not of type string'));
+      return;
     }
+
+    const storageUrl = configuration.storageAccountUrl || "https://mrohstoragetechrefdev01.blob.core.windows.net";
+    const containerPath = configuration.containerPath || "/mrohstoragetechrefdev01/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References";
+    const filePath = parameters.path;
+    const fullUrl = storageUrl + containerPath + "/" + filePath;
     
-    const content = await response.text();
+    // Get API version from configuration
+    const apiVersion = configuration["x-ms-version"] || "2020-04-08";
     
-    // Extract filename from path
-    const fileName = filePath.includes("/") ? filePath.split("/").pop() : filePath;
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
     
-    postResult({
-      content: content,
-      fileName: fileName
-    });
+    xhr.onreadystatechange = function() {
+      try {
+        if (xhr.readyState !== 4) {
+          return;
+        }
+        
+        if (xhr.status !== 200) {
+          reject(new Error("Failed with status " + xhr.status + ": " + xhr.statusText));
+          return;
+        }
+        
+        // Extract filename from path
+        const fileName = filePath.includes("/") ? filePath.split("/").pop() : filePath;
+        
+        postResult({
+          content: xhr.responseText,
+          fileName: fileName
+        });
+        
+        resolve();
+        
+      } catch (error) {
+        reject(error);
+      }
+    };
     
-  } catch (error) {
-    throw new Error("Error downloading file: " + error.message);
-  }
+    xhr.open("GET", fullUrl);
+    xhr.setRequestHeader("x-ms-version", apiVersion);
+    xhr.send();
+  });
 }
