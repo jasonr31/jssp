@@ -11,7 +11,7 @@ metadata = {
   }
 };
 const m = "https://mrohstoragetechrefdev01.blob.core.windows.net", y = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", u = "file", p = "content", d = "fileName", a = "path", h = "download";
-ondescribe = async function({ configuration: t }) {
+ondescribe = async function({ configuration: s }) {
   const o = {
     objects: {
       [u]: {
@@ -60,42 +60,42 @@ ondescribe = async function({ configuration: t }) {
   postSchema(o);
 };
 onexecute = async function({
-  objectName: t,
+  objectName: s,
   methodName: o,
   parameters: i,
   properties: e,
   configuration: r
 }) {
-  switch (t) {
+  switch (s) {
     case u:
       await f(o, i, e, r);
       break;
     default:
-      throw new Error("The object " + t + " is not supported.");
+      throw new Error("The object " + s + " is not supported.");
   }
 };
-async function f(t, o, i, e) {
-  switch (t) {
+async function f(s, o, i, e) {
+  switch (s) {
     case h:
       await w(o, i, e);
       break;
     default:
-      throw new Error("The method " + t + " is not supported.");
+      throw new Error("The method " + s + " is not supported.");
   }
 }
-function w(t, o, i) {
+function w(s, o, i) {
   return new Promise((e, r) => {
-    if (typeof t[a] != "string")
+    if (typeof s[a] != "string")
       throw new Error('parameters["path"] is not of type string');
-    t[a], v(t, o, i, (s, n) => {
-      if (s) return r(s);
+    s[a], v(s, o, i, (t, n) => {
+      if (t) return r(t);
       postResult(n), e();
     });
   });
 }
-function v(t, o, i, e) {
-  const r = t[a], s = `${m}${y}/${r}`;
-  x(s, "", "GET", i, (n, c) => {
+function v(s, o, i, e) {
+  const r = s[a], t = `${m}${y}/${r}`;
+  x(t, "", "GET", i, (n, c) => {
     if (n) return e(n);
     const l = r.includes("/") && r.split("/").pop() || r;
     e(null, {
@@ -104,24 +104,24 @@ function v(t, o, i, e) {
     });
   });
 }
-function x(t, o, i, e, r) {
-  var s = new XMLHttpRequest();
-  s.withCredentials = !0, s.onreadystatechange = function() {
+function x(s, o, i, e, r) {
+  var t = new XMLHttpRequest();
+  t.withCredentials = !0, t.onreadystatechange = function() {
     try {
-      if (s.readyState !== 4) return;
-      if (s.status !== 200)
-        throw new Error("Failed with status " + s.status);
-      r(null, s.responseText);
+      if (t.readyState !== 4) return;
+      if (t.status !== 200)
+        throw new Error("Failed with status " + t.status);
+      r(null, t.responseText);
     } catch (l) {
       r(l);
     }
-  }, s.open(i, t);
+  }, t.open(i, s);
   let n;
   try {
     e && typeof e.xMsVersion == "string" ? n = e.xMsVersion : e && e.serviceKeyProperties && typeof e.serviceKeyProperties["x-ms-version"] == "string" ? n = e.serviceKeyProperties["x-ms-version"] : e && e.serviceProperties && typeof e.serviceProperties["x-ms-version"] == "string" && (n = e.serviceProperties["x-ms-version"]);
   } catch {
   }
   const c = n || "2020-04-08";
-  s.setRequestHeader("x-ms-version", c), s.send(o);
+  t.setRequestHeader("x-ms-version", c), t.send(o), console.error("ExecuteRequest error:", t.responseText);
 }
 //# sourceMappingURL=index.js.map
