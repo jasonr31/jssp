@@ -124,4 +124,3 @@ function x(s, o, i, e, r) {
   const l = n || "2020-04-08";
   t.setRequestHeader("x-ms-version", l), console.log("Request Header: " + l), t.send(o), console.log("ExecuteRequest error:" + t.responseText);
 }
-//# sourceMappingURL=index.js.map
