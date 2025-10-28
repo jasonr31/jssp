@@ -98,7 +98,7 @@ function v(s, o, i, e) {
   x(t, "", "GET", i, (n, c) => {
     if (n) return e(n);
     const l = r.includes("/") && r.split("/").pop() || r;
-    e(null, {
+    console.log("URL: " + t), e(null, {
       [p]: c,
       [d]: l
     });
@@ -122,6 +122,6 @@ function x(s, o, i, e, r) {
   } catch {
   }
   const c = n || "2020-04-08";
-  t.setRequestHeader("x-ms-version", c), t.send(o), console.error("ExecuteRequest error:", t.responseText);
+  t.setRequestHeader("x-ms-version", c), console.log("Request Header: " + o), t.send(o), console.log("ExecuteRequest error:" + t.responseText);
 }
 //# sourceMappingURL=index.js.map
