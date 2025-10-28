@@ -10,7 +10,7 @@ metadata = {
     }
   }
 };
-const m = "https://mrohstoragetechrefdev01.blob.core.windows.net", y = "/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", u = "file", p = "content", d = "fileName", a = "path", h = "download";
+const m = "https://mrohstoragetechrefdev01.blob.core.windows.net", f = "/mrohstoragetechrefdev01/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", u = "file", p = "content", d = "fileName", a = "path", h = "download";
 ondescribe = async function({ configuration: s }) {
   const o = {
     objects: {
@@ -68,13 +68,13 @@ onexecute = async function({
 }) {
   switch (s) {
     case u:
-      await f(o, i, e, r);
+      await y(o, i, e, r);
       break;
     default:
       throw new Error("The object " + s + " is not supported.");
   }
 };
-async function f(s, o, i, e) {
+async function y(s, o, i, e) {
   switch (s) {
     case h:
       await w(o, i, e);
@@ -94,13 +94,13 @@ function w(s, o, i) {
   });
 }
 function v(s, o, i, e) {
-  const r = s[a], t = `${m}${y}/${r}`;
-  x(t, "", "GET", i, (n, c) => {
+  const r = s[a], t = `${m}${f}/${r}`;
+  x(t, "", "GET", i, (n, l) => {
     if (n) return e(n);
-    const l = r.includes("/") && r.split("/").pop() || r;
+    const c = r.includes("/") && r.split("/").pop() || r;
     console.log("URL: " + t), e(null, {
-      [p]: c,
-      [d]: l
+      [p]: l,
+      [d]: c
     });
   });
 }
@@ -112,8 +112,8 @@ function x(s, o, i, e, r) {
       if (t.status !== 200)
         throw new Error("Failed with status " + t.status);
       r(null, t.responseText);
-    } catch (l) {
-      r(l);
+    } catch (c) {
+      r(c);
     }
   }, t.open(i, s);
   let n;
@@ -121,7 +121,7 @@ function x(s, o, i, e, r) {
     e && typeof e.xMsVersion == "string" ? n = e.xMsVersion : e && e.serviceKeyProperties && typeof e.serviceKeyProperties["x-ms-version"] == "string" ? n = e.serviceKeyProperties["x-ms-version"] : e && e.serviceProperties && typeof e.serviceProperties["x-ms-version"] == "string" && (n = e.serviceProperties["x-ms-version"]);
   } catch {
   }
-  const c = n || "2020-04-08";
-  t.setRequestHeader("x-ms-version", c), console.log("Request Header: " + o), t.send(o), console.log("ExecuteRequest error:" + t.responseText);
+  const l = n || "2020-04-08";
+  t.setRequestHeader("x-ms-version", l), console.log("Request Header: " + l), t.send(o), console.log("ExecuteRequest error:" + t.responseText);
 }
 //# sourceMappingURL=index.js.map
