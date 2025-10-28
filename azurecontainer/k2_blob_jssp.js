@@ -3,12 +3,12 @@ metadata = {
   displayName: "MROH File Download Broker",
   description: "A broker for downloading files from MROH Azure Blob Storage.",
   configuration: {
-    "storageAccountUrl": {
+    storageAccountUrl: {
       displayName: "Storage Account URL",
       type: "string",
       value: "https://mrohstoragetechrefdev01.blob.core.windows.net"
     },
-    "containerPath": {
+    containerPath: {
       displayName: "Container Path",
       type: "string",
       value: "/mrohstoragetechrefdev01/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References"
@@ -20,115 +20,119 @@ metadata = {
     }
   }
 };
-
-ondescribe = async function({ configuration }) {
-  postSchema({
+const h = "file", p = "content", d = "fileName", l = "path", m = "download";
+ondescribe = async function({ configuration: s }) {
+  const i = {
     objects: {
-      file: {
+      [h]: {
         displayName: "File",
         description: "Download file content from Azure Blob Storage",
         properties: {
-          content: {
+          [p]: {
             displayName: "File Content",
             type: "string"
           },
-          fileName: {
+          [d]: {
             displayName: "File Name",
             type: "string"
           }
         },
         methods: {
-          download: {
+          [m]: {
             displayName: "Download File",
             type: "read",
-            outputs: ["content", "fileName"],
+            outputs: [p, d],
             parameters: {
-              path: {
+              [l]: {
                 displayName: "File Path",
                 description: "Path to the file in blob storage",
                 type: "string"
               }
             },
-            requiredParameters: ["path"]
+            requiredParameters: [l]
           }
         }
       }
+    },
+    // Expose service key properties so they appear in the K2 Service Instance UI.
+    configuration: {
+      serviceKeyProperties: {
+        "x-ms-version": {
+          displayName: "Azure Storage API Version (x-ms-version)",
+          description: "Optional override for the x-ms-version header sent to Azure Storage",
+          type: "string",
+          default: "2020-04-08"
+        }
+      }
     }
-  });
+  };
+  postSchema(i);
 };
-
 onexecute = async function({
-  objectName,
-  methodName,
-  parameters,
-  properties,
-  configuration
+  objectName: s,
+  methodName: i,
+  parameters: r,
+  properties: e,
+  configuration: o
 }) {
-  switch (objectName) {
-    case "file":
-      await handleFileObject(methodName, parameters, properties, configuration);
+  switch (s) {
+    case h:
+      await f(i, r, e, o);
       break;
     default:
-      throw new Error("The object " + objectName + " is not supported.");
+      throw new Error("The object " + s + " is not supported.");
   }
 };
-
-async function handleFileObject(methodName, parameters, properties, configuration) {
-  switch (methodName) {
-    case "download":
-      await downloadFile(parameters, properties, configuration);
+async function f(s, i, r, e) {
+  switch (s) {
+    case m:
+      await v(i, r, e);
       break;
     default:
-      throw new Error("The method " + methodName + " is not supported.");
+      throw new Error("The method " + s + " is not supported.");
   }
 }
-
-function downloadFile(parameters, properties, configuration) {
-  return new Promise(function(resolve, reject) {
-    if (typeof parameters.path !== "string") {
-      reject(new Error('parameters["path"] is not of type string'));
+function v(s, i, r) {
+  return new Promise((e, o) => {
+    if (typeof s[l] != "string") {
+      o(new Error('parameters["path"] is not of type string'));
       return;
     }
-
-    const storageUrl = configuration.storageAccountUrl || "https://mrohstoragetechrefdev01.blob.core.windows.net";
-    const containerPath = configuration.containerPath || "/mrohstoragetechrefdev01/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References";
-    const filePath = parameters.path;
-    const fullUrl = storageUrl + containerPath + "/" + filePath;
-    
-    // Get API version from configuration
-    const apiVersion = configuration["x-ms-version"] || "2020-04-08";
-    
-    var xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
-    
-    xhr.onreadystatechange = function() {
-      try {
-        if (xhr.readyState !== 4) {
-          return;
-        }
-        
-        if (xhr.status !== 200) {
-          reject(new Error("Failed with status " + xhr.status + ": " + xhr.statusText));
-          return;
-        }
-        
-        // Extract filename from path
-        const fileName = filePath.includes("/") ? filePath.split("/").pop() : filePath;
-        
-        postResult({
-          content: xhr.responseText,
-          fileName: fileName
-        });
-        
-        resolve();
-        
-      } catch (error) {
-        reject(error);
-      }
-    };
-    
-    xhr.open("GET", fullUrl);
-    xhr.setRequestHeader("x-ms-version", apiVersion);
-    xhr.send();
+    w(s, i, r, (t, n) => {
+      if (t) return o(t);
+      postResult(n), e();
+    });
   });
 }
+function w(s, i, r, e) {
+  const o = s[l], t = r && r.storageAccountUrl || "https://mrohstoragetechrefdev01.blob.core.windows.net", n = r && r.containerPath || "/mrohstoragetechrefdev01/Technical%20Reference/Work%20Orders/2025-298/2025-0394872/References", c = `${t}${n}/${o}`;
+  x(c, "", "GET", r, (a, y) => {
+    if (a) return e(a);
+    const u = o.includes("/") && o.split("/").pop() || o;
+    e(null, {
+      [p]: y,
+      [d]: u
+    });
+  });
+}
+function x(s, i, r, e, o) {
+  var t = new XMLHttpRequest();
+  t.withCredentials = !0, t.onreadystatechange = function() {
+    try {
+      if (t.readyState !== 4) return;
+      if (t.status !== 200)
+        throw new Error("Failed with status " + t.status + ": " + t.statusText);
+      o(null, t.responseText);
+    } catch (a) {
+      o(a);
+    }
+  }, t.open(r, s);
+  let n;
+  try {
+    e && typeof e.xMsVersion == "string" ? n = e.xMsVersion : e && typeof e["x-ms-version"] == "string" ? n = e["x-ms-version"] : e && e.serviceKeyProperties && typeof e.serviceKeyProperties["x-ms-version"] == "string" ? n = e.serviceKeyProperties["x-ms-version"] : e && e.serviceProperties && typeof e.serviceProperties["x-ms-version"] == "string" && (n = e.serviceProperties["x-ms-version"]);
+  } catch {
+  }
+  const c = n || "2020-04-08";
+  t.setRequestHeader("x-ms-version", c), t.send(i);
+}
+//# sourceMappingURL=BlobFileDownloadBroker.js.map
