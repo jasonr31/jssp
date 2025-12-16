@@ -41,23 +41,8 @@ ondescribe = async function({ configuration: e }) {
           }
         },
         methods: {
-          createLineItem: {
-            displayName: "Create Line Item JSON",
-            type: "read",
-            parameters: {
-              addj: { displayName: "Date (ADDJ)", type: "string" },
-              lnty: { displayName: "Line Type (LNTY)", type: "string" },
-              uorg: { displayName: "Quantity (UORG)", type: "string" },
-              uom: { displayName: "UOM", type: "string" },
-              litm: { displayName: "Item (LITM)", type: "string" },
-              uprc: { displayName: "Unit Price (UPRC)", type: "string" },
-              uom4: { displayName: "UOM4", type: "string" }
-            },
-            requiredParameters: [],
-            outputs: ["linesArrayJSON", "success", "errorMessage"]
-          },
-          appendLineItem: {
-            displayName: "Append Line Item",
+          addLineItem: {
+            displayName: "Add Line Item",
             type: "read",
             parameters: {
               existingLinesJSON: { displayName: "Existing Lines JSON", type: "string" },
@@ -107,138 +92,115 @@ ondescribe = async function({ configuration: e }) {
     }
   });
 };
-onexecute = async function({ objectName: e, methodName: t, parameters: n, properties: i, configuration: r, schema: s }) {
+onexecute = async function({ objectName: e, methodName: s, parameters: n, properties: r, configuration: i, schema: t }) {
   switch (e) {
     case "jsonBuilder":
-      await l(t, n);
+      await l(s, n);
       break;
     default:
       throw new Error("The object " + e + " is not supported.");
   }
 };
-async function l(e, t, n, i) {
+async function l(e, s, n, r) {
   switch (e) {
-    case "createLineItem":
-      await y(t);
-      break;
-    case "appendLineItem":
-      await u(t);
+    case "addLineItem":
+      await y(s);
       break;
     case "buildFullJSON":
-      await d(t);
+      await u(s);
       break;
     case "validateJSON":
-      await c(t);
+      await d(s);
       break;
     case "initializeEmptyArray":
-      await p();
+      await c();
       break;
     default:
       throw new Error("The method " + e + " is not supported.");
   }
 }
 function y(e) {
-  return new Promise((t, n) => {
+  return new Promise((s, n) => {
     try {
-      const i = {};
-      e.addj && (i.ADDJ = e.addj), e.lnty && (i.LNTY = e.lnty), e.uorg && (i.UORG = e.uorg), e.uom && (i.UOM = e.uom), e.litm && (i.LITM = e.litm), e.uprc && (i.UPRC = e.uprc), e.uom4 && (i.UOM4 = e.uom4);
-      const r = [i];
-      postResult({
-        linesArrayJSON: JSON.stringify(r),
-        success: !0,
-        errorMessage: ""
-      }), t();
-    } catch (i) {
-      postResult({
-        linesArrayJSON: "",
-        success: !1,
-        errorMessage: i instanceof Error ? i.message : String(i)
-      }), t();
-    }
-  });
-}
-function u(e) {
-  return new Promise((t, n) => {
-    try {
-      let i = [];
+      let r = [];
       if (e.existingLinesJSON)
         try {
-          const s = JSON.parse(e.existingLinesJSON);
-          if (!Array.isArray(s))
+          const t = JSON.parse(e.existingLinesJSON);
+          if (!Array.isArray(t))
             throw new Error("Existing lines JSON is not an array");
-          i = s;
-        } catch (s) {
-          throw new Error("Invalid existing lines JSON: " + (s instanceof Error ? s.message : String(s)));
+          r = t;
+        } catch (t) {
+          throw new Error("Invalid existing lines JSON: " + (t instanceof Error ? t.message : String(t)));
         }
-      const r = {};
-      e.addj && (r.ADDJ = e.addj), e.lnty && (r.LNTY = e.lnty), e.uorg && (r.UORG = e.uorg), e.uom && (r.UOM = e.uom), e.litm && (r.LITM = e.litm), e.uprc && (r.UPRC = e.uprc), e.uom4 && (r.UOM4 = e.uom4), i.push(r), postResult({
-        linesArrayJSON: JSON.stringify(i),
-        lineCount: i.length,
+      const i = {};
+      e.addj && (i.ADDJ = e.addj), e.lnty && (i.LNTY = e.lnty), e.uorg && (i.UORG = e.uorg), e.uom && (i.UOM = e.uom), e.litm && (i.LITM = e.litm), e.uprc && (i.UPRC = e.uprc), e.uom4 && (i.UOM4 = e.uom4), r.push(i), postResult({
+        linesArrayJSON: JSON.stringify(r),
+        lineCount: r.length,
         success: !0,
         errorMessage: ""
-      }), t();
-    } catch (i) {
+      }), s();
+    } catch (r) {
       postResult({
         linesArrayJSON: "",
         lineCount: 0,
         success: !1,
-        errorMessage: i instanceof Error ? i.message : String(i)
-      }), t();
+        errorMessage: r instanceof Error ? r.message : String(r)
+      }), s();
     }
   });
 }
-function d(e) {
-  return new Promise((t, n) => {
+function u(e) {
+  return new Promise((s, n) => {
     try {
-      let i = [];
+      let r = [];
       if (e.linesArrayJSON)
         try {
           const a = JSON.parse(e.linesArrayJSON);
           if (!Array.isArray(a))
             throw new Error("Lines array JSON is not an array");
-          i = a;
+          r = a;
         } catch (a) {
           throw new Error("Invalid lines array JSON: " + (a instanceof Error ? a.message : String(a)));
         }
-      const r = {};
-      e.shan && (r.SHAN = e.shan), e.vr01 && (r.VR01 = e.vr01), e.vr02 && (r.VR02 = e.vr02), e.drqj && (r.DRQJ = e.drqj), i.length > 0 && (r.GridIn_1_3 = i);
-      const o = e.prettyPrint && e.prettyPrint.toString().toLowerCase() === "true" ? JSON.stringify(r, null, 2) : JSON.stringify(r);
+      const i = {};
+      e.shan && (i.SHAN = e.shan), e.vr01 && (i.VR01 = e.vr01), e.vr02 && (i.VR02 = e.vr02), e.drqj && (i.DRQJ = e.drqj), r.length > 0 && (i.GridIn_1_3 = r);
+      const o = e.prettyPrint && e.prettyPrint.toString().toLowerCase() === "true" ? JSON.stringify(i, null, 2) : JSON.stringify(i);
       postResult({
         requestJSON: o,
         success: !0,
         errorMessage: "",
-        lineCount: i.length
-      }), t();
-    } catch (i) {
+        lineCount: r.length
+      }), s();
+    } catch (r) {
       postResult({
         requestJSON: "",
         success: !1,
-        errorMessage: i instanceof Error ? i.message : String(i),
+        errorMessage: r instanceof Error ? r.message : String(r),
         lineCount: 0
-      }), t();
+      }), s();
     }
   });
 }
-function c(e) {
-  return new Promise((t, n) => {
+function d(e) {
+  return new Promise((s, n) => {
     try {
-      const i = JSON.parse(e.jsonString);
+      const r = JSON.parse(e.jsonString);
       postResult({
         isValid: !0,
         errorMessage: "",
-        parsedJSON: JSON.stringify(i, null, 2)
-      }), t();
-    } catch (i) {
+        parsedJSON: JSON.stringify(r, null, 2)
+      }), s();
+    } catch (r) {
       postResult({
         isValid: !1,
-        errorMessage: i instanceof Error ? i.message : String(i),
+        errorMessage: r instanceof Error ? r.message : String(r),
         parsedJSON: ""
-      }), t();
+      }), s();
     }
   });
 }
-function p() {
-  return new Promise((e, t) => {
+function c() {
+  return new Promise((e, s) => {
     try {
       postResult({
         linesArrayJSON: "[]",
