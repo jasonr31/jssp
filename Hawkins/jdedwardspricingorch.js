@@ -1,29 +1,12 @@
 metadata = {
   systemName: "com.jde.orchestration",
   displayName: "JD Edwards Orchestration",
-  description: "Call JD Edwards 9.2 orchestration REST APIs with Basic or Bearer token authentication.",
+  description: "Call JD Edwards 9.2 orchestration REST APIs. Use K2 Static Credentials for authentication.",
   configuration: {
     baseURL: {
       displayName: "Base URL",
       type: "string",
       required: !0
-    },
-    authType: {
-      displayName: "Authentication Type",
-      type: "string",
-      value: "Basic"
-    },
-    username: {
-      displayName: "Username",
-      type: "string"
-    },
-    password: {
-      displayName: "Password",
-      type: "string"
-    },
-    bearerToken: {
-      displayName: "Bearer Token",
-      type: "string"
     }
   }
 };
@@ -108,28 +91,28 @@ ondescribe = async function({ configuration: e }) {
     }
   });
 };
-onexecute = async function({ objectName: e, methodName: s, parameters: a, properties: t, configuration: r, schema: n }) {
+onexecute = async function({ objectName: e, methodName: s, parameters: c, properties: t, configuration: r, schema: n }) {
   switch (e) {
     case "orchestration":
-      await y(s, a, t, r);
+      await u(s, c, t, r);
       break;
     default:
       throw new Error("The object " + e + " is not supported.");
   }
 };
-async function y(e, s, a, t) {
+async function u(e, s, c, t) {
   switch (e) {
     case "addLineItem":
-      await d(s);
-      break;
-    case "buildFullJSON":
       await l(s);
       break;
+    case "buildFullJSON":
+      await d(s);
+      break;
     case "callOrchestration":
-      await p(s, t);
+      await g(s, t);
       break;
     case "validateJSON":
-      await g(s);
+      await p(s);
       break;
     case "initializeEmptyArray":
       await S();
@@ -138,16 +121,16 @@ async function y(e, s, a, t) {
       throw new Error("The method " + e + " is not supported.");
   }
 }
-function d(e) {
-  return new Promise((s, a) => {
+function l(e) {
+  return new Promise((s, c) => {
     try {
       let t = [];
       if (e.existingLinesJSON)
         try {
-          const n = String(e.existingLinesJSON), c = JSON.parse(n);
-          if (!Array.isArray(c))
+          const n = String(e.existingLinesJSON), o = JSON.parse(n);
+          if (!Array.isArray(o))
             throw new Error("Existing lines JSON is not an array");
-          t = c;
+          t = o;
         } catch (n) {
           throw new Error("Invalid existing lines JSON: " + (n instanceof Error ? n.message : String(n)));
         }
@@ -168,24 +151,24 @@ function d(e) {
     }
   });
 }
-function l(e) {
-  return new Promise((s, a) => {
+function d(e) {
+  return new Promise((s, c) => {
     try {
       let t = [];
       if (e.linesArrayJSON)
         try {
-          const i = String(e.linesArrayJSON), o = JSON.parse(i);
-          if (!Array.isArray(o))
+          const i = String(e.linesArrayJSON), y = JSON.parse(i);
+          if (!Array.isArray(y))
             throw new Error("Lines array JSON is not an array");
-          t = o;
+          t = y;
         } catch (i) {
           throw new Error("Invalid lines array JSON: " + (i instanceof Error ? i.message : String(i)));
         }
       const r = {};
       e.shan && (r.SHAN = String(e.shan)), e.vr01 && (r.VR01 = String(e.vr01)), e.vr02 && (r.VR02 = String(e.vr02)), e.drqj && (r.DRQJ = String(e.drqj)), t.length > 0 && (r.GridIn_1_3 = t);
-      const n = e.prettyPrint, u = n && String(n).toLowerCase() === "true" ? JSON.stringify(r, null, 2) : JSON.stringify(r);
+      const n = e.prettyPrint, a = n && String(n).toLowerCase() === "true" ? JSON.stringify(r, null, 2) : JSON.stringify(r);
       postResult({
-        requestJSON: u,
+        requestJSON: a,
         success: !0,
         errorMessage: "",
         lineCount: t.length
@@ -200,49 +183,49 @@ function l(e) {
     }
   });
 }
-function p(e, s) {
-  return new Promise((a, t) => {
+function g(e, s) {
+  return new Promise((c, t) => {
     try {
       const r = s.baseURL;
       if (!r)
         throw new Error("Base URL is required in configuration");
       let n = String(r);
       n.endsWith("/") || (n += "/"), n += "jderest/v2/orchestrator/" + String(e.orchestrationName);
-      const c = {};
-      if (e.shan && (c.SHAN = String(e.shan)), e.vr01 && (c.VR01 = String(e.vr01)), e.vr02 && (c.VR02 = String(e.vr02)), e.drqj && (c.DRQJ = String(e.drqj)), e.gridInJSON)
+      const o = {};
+      if (e.shan && (o.SHAN = String(e.shan)), e.vr01 && (o.VR01 = String(e.vr01)), e.vr02 && (o.VR02 = String(e.vr02)), e.drqj && (o.DRQJ = String(e.drqj)), e.gridInJSON)
         try {
-          const o = String(e.gridInJSON);
-          c.GridIn_1_3 = JSON.parse(o);
-        } catch (o) {
-          throw new Error("Invalid GridIn_JSON format: " + (o instanceof Error ? o.message : String(o)));
+          const i = String(e.gridInJSON);
+          o.GridIn_1_3 = JSON.parse(i);
+        } catch (i) {
+          throw new Error("Invalid GridIn_JSON format: " + (i instanceof Error ? i.message : String(i)));
         }
-      const u = N(s), i = new XMLHttpRequest();
-      i.onreadystatechange = function() {
+      const a = new XMLHttpRequest();
+      a.onreadystatechange = function() {
         try {
-          if (i.readyState !== 4) return;
-          const o = i.status >= 200 && i.status < 300;
+          if (a.readyState !== 4) return;
+          const i = a.status >= 200 && a.status < 300;
           postResult({
-            statusCode: i.status,
-            responseBody: i.responseText,
-            success: o,
-            errorMessage: o ? "" : "HTTP " + i.status + ": " + i.statusText
-          }), a();
-        } catch (o) {
-          t(o);
+            statusCode: a.status,
+            responseBody: a.responseText,
+            success: i,
+            errorMessage: i ? "" : "HTTP " + a.status + ": " + a.statusText
+          }), c();
+        } catch (i) {
+          t(i);
         }
-      }, i.open("POST", n), i.setRequestHeader("Content-Type", "application/json"), i.setRequestHeader("Authorization", u), i.send(JSON.stringify(c));
+      }, a.open("POST", n), a.setRequestHeader("Content-Type", "application/json"), a.send(JSON.stringify(o));
     } catch (r) {
       postResult({
         statusCode: 0,
         responseBody: "",
         success: !1,
         errorMessage: r instanceof Error ? r.message : String(r)
-      }), a();
+      }), c();
     }
   });
 }
-function g(e) {
-  return new Promise((s, a) => {
+function p(e) {
+  return new Promise((s, c) => {
     try {
       const t = String(e.jsonString), r = JSON.parse(t);
       postResult({
@@ -273,28 +256,5 @@ function S() {
       }), e();
     }
   });
-}
-function N(e) {
-  const s = e.authType || "Basic";
-  if (String(s).toLowerCase() === "bearer") {
-    const t = e.bearerToken;
-    if (!t)
-      throw new Error("Bearer token is required when AuthType is Bearer");
-    return "Bearer " + String(t);
-  } else {
-    const t = e.username, r = e.password;
-    if (!t || !r)
-      throw new Error("Username and Password are required when AuthType is Basic");
-    return "Basic " + h(String(t) + ":" + String(r));
-  }
-}
-function h(e) {
-  const s = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-  let a = "";
-  for (let t = 0; t < e.length; t += 3) {
-    const r = e.charCodeAt(t), n = t + 1 < e.length ? e.charCodeAt(t + 1) : 0, c = t + 2 < e.length ? e.charCodeAt(t + 2) : 0, u = r << 16 | n << 8 | c;
-    a += s[u >> 18 & 63], a += s[u >> 12 & 63], a += s[t + 1 < e.length ? u >> 6 & 63 : 64], a += s[t + 2 < e.length ? u & 63 : 64];
-  }
-  return a;
 }
 //# sourceMappingURL=jdedwardspricingorch.js.map
