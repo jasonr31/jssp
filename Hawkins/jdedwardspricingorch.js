@@ -1,7 +1,7 @@
 metadata = {
   systemName: "com.jde.orchestration",
   displayName: "JD Edwards Orchestration",
-  description: "Call JD Edwards 9.2 orchestration REST APIs. Use K2 Static Credentials for authentication.",
+  description: "Call JD Edwards 9.2 orchestration REST APIs. Use K2 Static Credentials for authentication. Version: 24",
   configuration: {
     baseURL: {
       displayName: "Base URL",
@@ -91,28 +91,28 @@ ondescribe = async function({ configuration: e }) {
     }
   });
 };
-onexecute = async function({ objectName: e, methodName: s, parameters: c, properties: t, configuration: r, schema: n }) {
+onexecute = async function({ objectName: e, methodName: r, parameters: c, properties: t, configuration: s, schema: n }) {
   switch (e) {
     case "orchestration":
-      await u(s, c, t, r);
+      await u(r, c, t, s);
       break;
     default:
       throw new Error("The object " + e + " is not supported.");
   }
 };
-async function u(e, s, c, t) {
+async function u(e, r, c, t) {
   switch (e) {
     case "addLineItem":
-      await l(s);
+      await l(r);
       break;
     case "buildFullJSON":
-      await d(s);
+      await d(r);
       break;
     case "callOrchestration":
-      await g(s, t);
+      await g(r, t);
       break;
     case "validateJSON":
-      await p(s);
+      await p(r);
       break;
     case "initializeEmptyArray":
       await S();
@@ -122,7 +122,7 @@ async function u(e, s, c, t) {
   }
 }
 function l(e) {
-  return new Promise((s, c) => {
+  return new Promise((r, c) => {
     try {
       let t = [];
       if (e.existingLinesJSON)
@@ -134,25 +134,25 @@ function l(e) {
         } catch (n) {
           throw new Error("Invalid existing lines JSON: " + (n instanceof Error ? n.message : String(n)));
         }
-      const r = {};
-      e.addj && (r.ADDJ = String(e.addj)), e.lnty && (r.LNTY = String(e.lnty)), e.uorg && (r.UORG = String(e.uorg)), e.uom && (r.UOM = String(e.uom)), e.litm && (r.LITM = String(e.litm)), e.uprc && (r.UPRC = String(e.uprc)), e.uom4 && (r.UOM4 = String(e.uom4)), t.push(r), postResult({
+      const s = {};
+      e.addj && (s.ADDJ = String(e.addj)), e.lnty && (s.LNTY = String(e.lnty)), e.uorg && (s.UORG = String(e.uorg)), e.uom && (s.UOM = String(e.uom)), e.litm && (s.LITM = String(e.litm)), e.uprc && (s.UPRC = String(e.uprc)), e.uom4 && (s.UOM4 = String(e.uom4)), t.push(s), postResult({
         linesArrayJSON: JSON.stringify(t),
         lineCount: t.length,
         success: !0,
         errorMessage: ""
-      }), s();
+      }), r();
     } catch (t) {
       postResult({
         linesArrayJSON: "",
         lineCount: 0,
         success: !1,
         errorMessage: t instanceof Error ? t.message : String(t)
-      }), s();
+      }), r();
     }
   });
 }
 function d(e) {
-  return new Promise((s, c) => {
+  return new Promise((r, c) => {
     try {
       let t = [];
       if (e.linesArrayJSON)
@@ -164,33 +164,33 @@ function d(e) {
         } catch (i) {
           throw new Error("Invalid lines array JSON: " + (i instanceof Error ? i.message : String(i)));
         }
-      const r = {};
-      e.shan && (r.SHAN = String(e.shan)), e.vr01 && (r.VR01 = String(e.vr01)), e.vr02 && (r.VR02 = String(e.vr02)), e.drqj && (r.DRQJ = String(e.drqj)), t.length > 0 && (r.GridIn_1_3 = t);
-      const n = e.prettyPrint, a = n && String(n).toLowerCase() === "true" ? JSON.stringify(r, null, 2) : JSON.stringify(r);
+      const s = {};
+      e.shan && (s.SHAN = String(e.shan)), e.vr01 && (s.VR01 = String(e.vr01)), e.vr02 && (s.VR02 = String(e.vr02)), e.drqj && (s.DRQJ = String(e.drqj)), t.length > 0 && (s.GridIn_1_3 = t);
+      const n = e.prettyPrint, a = n && String(n).toLowerCase() === "true" ? JSON.stringify(s, null, 2) : JSON.stringify(s);
       postResult({
         requestJSON: a,
         success: !0,
         errorMessage: "",
         lineCount: t.length
-      }), s();
+      }), r();
     } catch (t) {
       postResult({
         requestJSON: "",
         success: !1,
         errorMessage: t instanceof Error ? t.message : String(t),
         lineCount: 0
-      }), s();
+      }), r();
     }
   });
 }
-function g(e, s) {
+function g(e, r) {
   return new Promise((c, t) => {
     try {
-      const r = s.baseURL;
-      if (!r)
+      const s = r.baseURL;
+      if (!s)
         throw new Error("Base URL is required in configuration");
-      let n = String(r);
-      n.endsWith("/") || (n += "/"), n += "jderest/v2/orchestrator/" + String(e.orchestrationName);
+      let n = String(s);
+      n.endsWith("/") || (n += "/"), n += String(e.orchestrationName);
       const o = {};
       if (e.shan && (o.SHAN = String(e.shan)), e.vr01 && (o.VR01 = String(e.vr01)), e.vr02 && (o.VR02 = String(e.vr02)), e.drqj && (o.DRQJ = String(e.drqj)), e.gridInJSON)
         try {
@@ -214,36 +214,36 @@ function g(e, s) {
           t(i);
         }
       }, a.open("POST", n), a.setRequestHeader("Content-Type", "application/json"), a.send(JSON.stringify(o));
-    } catch (r) {
+    } catch (s) {
       postResult({
         statusCode: 0,
         responseBody: "",
         success: !1,
-        errorMessage: r instanceof Error ? r.message : String(r)
+        errorMessage: s instanceof Error ? s.message : String(s)
       }), c();
     }
   });
 }
 function p(e) {
-  return new Promise((s, c) => {
+  return new Promise((r, c) => {
     try {
-      const t = String(e.jsonString), r = JSON.parse(t);
+      const t = String(e.jsonString), s = JSON.parse(t);
       postResult({
         success: !0,
         errorMessage: "",
-        requestJSON: JSON.stringify(r, null, 2)
-      }), s();
+        requestJSON: JSON.stringify(s, null, 2)
+      }), r();
     } catch (t) {
       postResult({
         success: !1,
         errorMessage: t instanceof Error ? t.message : String(t),
         requestJSON: ""
-      }), s();
+      }), r();
     }
   });
 }
 function S() {
-  return new Promise((e, s) => {
+  return new Promise((e, r) => {
     try {
       postResult({
         linesArrayJSON: "[]",
