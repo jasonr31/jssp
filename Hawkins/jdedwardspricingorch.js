@@ -222,8 +222,8 @@ function p(e, s) {
       }, a.open("POST", n), a.setRequestHeader("Content-Type", "application/json");
       const u = s.bearerToken;
       if (u && String(u).trim() !== "") {
-        const i = String(u).trim(), y = i.startsWith("Bearer ") ? i : "Bearer " + i;
-        a.setRequestHeader("Authorization", y);
+        const i = String(u).trim(), y = i.startsWith("Bearer ") ? i.substring(7).trim() : i;
+        a.setRequestHeader("Authorization", "Bearer " + encodeURIComponent(y));
       }
       a.send(JSON.stringify(o));
     } catch (r) {
