@@ -1,12 +1,18 @@
 metadata = {
   systemName: "com.jde.orchestration",
   displayName: "JD Edwards Orchestration",
-  description: "Call JD Edwards 9.2 orchestration REST APIs. Use K2 Static Credentials for authentication. Version: 24",
+  description: "Call JD Edwards 9.2 orchestration REST APIs. Configure authentication via K2 Static Credentials or provide Bearer Token in configuration.",
   configuration: {
     baseURL: {
       displayName: "Base URL",
       type: "string",
       required: !0
+    },
+    bearerToken: {
+      displayName: "Bearer Token (Optional)",
+      type: "string",
+      required: !1,
+      value: ""
     }
   }
 };
@@ -91,38 +97,38 @@ ondescribe = async function({ configuration: e }) {
     }
   });
 };
-onexecute = async function({ objectName: e, methodName: r, parameters: c, properties: t, configuration: s, schema: n }) {
+onexecute = async function({ objectName: e, methodName: s, parameters: u, properties: t, configuration: r, schema: n }) {
   switch (e) {
     case "orchestration":
-      await u(r, c, t, s);
+      await l(s, u, t, r);
       break;
     default:
       throw new Error("The object " + e + " is not supported.");
   }
 };
-async function u(e, r, c, t) {
+async function l(e, s, u, t) {
   switch (e) {
     case "addLineItem":
-      await l(r);
+      await d(s);
       break;
     case "buildFullJSON":
-      await d(r);
+      await g(s);
       break;
     case "callOrchestration":
-      await g(r, t);
+      await p(s, t);
       break;
     case "validateJSON":
-      await p(r);
+      await S(s);
       break;
     case "initializeEmptyArray":
-      await S();
+      await N();
       break;
     default:
       throw new Error("The method " + e + " is not supported.");
   }
 }
-function l(e) {
-  return new Promise((r, c) => {
+function d(e) {
+  return new Promise((s, u) => {
     try {
       let t = [];
       if (e.existingLinesJSON)
@@ -134,62 +140,62 @@ function l(e) {
         } catch (n) {
           throw new Error("Invalid existing lines JSON: " + (n instanceof Error ? n.message : String(n)));
         }
-      const s = {};
-      e.addj && (s.ADDJ = String(e.addj)), e.lnty && (s.LNTY = String(e.lnty)), e.uorg && (s.UORG = String(e.uorg)), e.uom && (s.UOM = String(e.uom)), e.litm && (s.LITM = String(e.litm)), e.uprc && (s.UPRC = String(e.uprc)), e.uom4 && (s.UOM4 = String(e.uom4)), t.push(s), postResult({
+      const r = {};
+      e.addj && (r.ADDJ = String(e.addj)), e.lnty && (r.LNTY = String(e.lnty)), e.uorg && (r.UORG = String(e.uorg)), e.uom && (r.UOM = String(e.uom)), e.litm && (r.LITM = String(e.litm)), e.uprc && (r.UPRC = String(e.uprc)), e.uom4 && (r.UOM4 = String(e.uom4)), t.push(r), postResult({
         linesArrayJSON: JSON.stringify(t),
         lineCount: t.length,
         success: !0,
         errorMessage: ""
-      }), r();
+      }), s();
     } catch (t) {
       postResult({
         linesArrayJSON: "",
         lineCount: 0,
         success: !1,
         errorMessage: t instanceof Error ? t.message : String(t)
-      }), r();
+      }), s();
     }
   });
 }
-function d(e) {
-  return new Promise((r, c) => {
+function g(e) {
+  return new Promise((s, u) => {
     try {
       let t = [];
       if (e.linesArrayJSON)
         try {
-          const i = String(e.linesArrayJSON), y = JSON.parse(i);
-          if (!Array.isArray(y))
+          const c = String(e.linesArrayJSON), i = JSON.parse(c);
+          if (!Array.isArray(i))
             throw new Error("Lines array JSON is not an array");
-          t = y;
-        } catch (i) {
-          throw new Error("Invalid lines array JSON: " + (i instanceof Error ? i.message : String(i)));
+          t = i;
+        } catch (c) {
+          throw new Error("Invalid lines array JSON: " + (c instanceof Error ? c.message : String(c)));
         }
-      const s = {};
-      e.shan && (s.SHAN = String(e.shan)), e.vr01 && (s.VR01 = String(e.vr01)), e.vr02 && (s.VR02 = String(e.vr02)), e.drqj && (s.DRQJ = String(e.drqj)), t.length > 0 && (s.GridIn_1_3 = t);
-      const n = e.prettyPrint, a = n && String(n).toLowerCase() === "true" ? JSON.stringify(s, null, 2) : JSON.stringify(s);
+      const r = {};
+      e.shan && (r.SHAN = String(e.shan)), e.vr01 && (r.VR01 = String(e.vr01)), e.vr02 && (r.VR02 = String(e.vr02)), e.drqj && (r.DRQJ = String(e.drqj)), t.length > 0 && (r.GridIn_1_3 = t);
+      const n = e.prettyPrint, a = n && String(n).toLowerCase() === "true" ? JSON.stringify(r, null, 2) : JSON.stringify(r);
       postResult({
         requestJSON: a,
         success: !0,
         errorMessage: "",
         lineCount: t.length
-      }), r();
+      }), s();
     } catch (t) {
       postResult({
         requestJSON: "",
         success: !1,
         errorMessage: t instanceof Error ? t.message : String(t),
         lineCount: 0
-      }), r();
+      }), s();
     }
   });
 }
-function g(e, r) {
-  return new Promise((c, t) => {
+function p(e, s) {
+  return new Promise((u, t) => {
     try {
-      const s = r.baseURL;
-      if (!s)
+      const r = s.baseURL;
+      if (!r)
         throw new Error("Base URL is required in configuration");
-      let n = String(s);
+      let n = String(r);
       n.endsWith("/") || (n += "/"), n += String(e.orchestrationName);
       const o = {};
       if (e.shan && (o.SHAN = String(e.shan)), e.vr01 && (o.VR01 = String(e.vr01)), e.vr02 && (o.VR02 = String(e.vr02)), e.drqj && (o.DRQJ = String(e.drqj)), e.gridInJSON)
@@ -209,41 +215,47 @@ function g(e, r) {
             responseBody: a.responseText,
             success: i,
             errorMessage: i ? "" : "HTTP " + a.status + ": " + a.statusText
-          }), c();
+          }), u();
         } catch (i) {
           t(i);
         }
-      }, a.open("POST", n), a.setRequestHeader("Content-Type", "application/json"), a.send(JSON.stringify(o));
-    } catch (s) {
+      }, a.open("POST", n), a.setRequestHeader("Content-Type", "application/json");
+      const c = s.bearerToken;
+      if (c && String(c).trim() !== "") {
+        const i = String(c).trim(), y = i.startsWith("Bearer ") ? i : "Bearer " + i;
+        a.setRequestHeader("Authorization", y);
+      }
+      a.send(JSON.stringify(o));
+    } catch (r) {
       postResult({
         statusCode: 0,
         responseBody: "",
         success: !1,
-        errorMessage: s instanceof Error ? s.message : String(s)
-      }), c();
+        errorMessage: r instanceof Error ? r.message : String(r)
+      }), u();
     }
   });
 }
-function p(e) {
-  return new Promise((r, c) => {
+function S(e) {
+  return new Promise((s, u) => {
     try {
-      const t = String(e.jsonString), s = JSON.parse(t);
+      const t = String(e.jsonString), r = JSON.parse(t);
       postResult({
         success: !0,
         errorMessage: "",
-        requestJSON: JSON.stringify(s, null, 2)
-      }), r();
+        requestJSON: JSON.stringify(r, null, 2)
+      }), s();
     } catch (t) {
       postResult({
         success: !1,
         errorMessage: t instanceof Error ? t.message : String(t),
         requestJSON: ""
-      }), r();
+      }), s();
     }
   });
 }
-function S() {
-  return new Promise((e, r) => {
+function N() {
+  return new Promise((e, s) => {
     try {
       postResult({
         linesArrayJSON: "[]",
