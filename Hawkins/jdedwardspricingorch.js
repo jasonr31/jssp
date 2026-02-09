@@ -1,18 +1,22 @@
 metadata = {
   systemName: "com.jde.orchestration",
   displayName: "JD Edwards Orchestration",
-  description: "Call JD Edwards 9.2 orchestration REST APIs. Configure Base URL and optional Bearer Token in service instance keys.",
+  description: "Call JD Edwards 9.2 orchestration REST APIs using Basic Authentication (username/password).",
   configuration: {
     baseURL: {
       displayName: "Base URL",
       type: "string",
       required: !0
     },
-    bearerToken: {
-      displayName: "Bearer Token (Optional)",
+    username: {
+      displayName: "Username",
       type: "string",
-      required: !1,
-      value: ""
+      required: !0
+    },
+    password: {
+      displayName: "Password",
+      type: "string",
+      required: !0
     }
   }
 };
@@ -74,7 +78,7 @@ ondescribe = async function({ configuration: e }) {
               gridInJSON: { displayName: "Grid Input (JSON)", type: "string" }
             },
             requiredParameters: ["orchestrationName"],
-            outputs: ["statusCode", "responseBody", "success", "errorMessage"]
+            outputs: ["statusCode", "responseBody", "success", "errorMessage", "requestJSON"]
           },
           validateJSON: {
             displayName: "Validate JSON",
@@ -97,102 +101,102 @@ ondescribe = async function({ configuration: e }) {
     }
   });
 };
-onexecute = async function({ objectName: e, methodName: s, parameters: c, properties: t, configuration: r, schema: n }) {
+onexecute = async function({ objectName: e, methodName: t, parameters: a, properties: s, configuration: r, schema: n }) {
   switch (e) {
     case "orchestration":
-      await l(s, c, t, r);
+      await p(t, a, s, r);
       break;
     default:
       throw new Error("The object " + e + " is not supported.");
   }
 };
-async function l(e, s, c, t) {
+async function p(e, t, a, s) {
   switch (e) {
     case "addLineItem":
-      await d(s);
+      await S(t);
       break;
     case "buildFullJSON":
-      await g(s);
+      await N(t);
       break;
     case "callOrchestration":
-      await p(s, t);
+      await O(t, s);
       break;
     case "validateJSON":
-      await S(s);
+      await J(t);
       break;
     case "initializeEmptyArray":
-      await N();
+      await h();
       break;
     default:
       throw new Error("The method " + e + " is not supported.");
   }
 }
-function d(e) {
-  return new Promise((s, c) => {
+function S(e) {
+  return new Promise((t, a) => {
     try {
-      let t = [];
+      let s = [];
       if (e.existingLinesJSON)
         try {
           const n = String(e.existingLinesJSON), o = JSON.parse(n);
           if (!Array.isArray(o))
             throw new Error("Existing lines JSON is not an array");
-          t = o;
+          s = o;
         } catch (n) {
           throw new Error("Invalid existing lines JSON: " + (n instanceof Error ? n.message : String(n)));
         }
       const r = {};
-      e.addj && (r.ADDJ = String(e.addj)), e.lnty && (r.LNTY = String(e.lnty)), e.uorg && (r.UORG = String(e.uorg)), e.uom && (r.UOM = String(e.uom)), e.litm && (r.LITM = String(e.litm)), e.uprc && (r.UPRC = String(e.uprc)), e.uom4 && (r.UOM4 = String(e.uom4)), t.push(r), postResult({
-        linesArrayJSON: JSON.stringify(t),
-        lineCount: t.length,
+      e.addj && (r.ADDJ = String(e.addj)), e.lnty && (r.LNTY = String(e.lnty)), e.uorg && (r.UORG = String(e.uorg)), e.uom && (r.UOM = String(e.uom)), e.litm && (r.LITM = String(e.litm)), e.uprc && (r.UPRC = String(e.uprc)), e.uom4 && (r.UOM4 = String(e.uom4)), s.push(r), postResult({
+        linesArrayJSON: JSON.stringify(s),
+        lineCount: s.length,
         success: !0,
         errorMessage: ""
-      }), s();
-    } catch (t) {
+      }), t();
+    } catch (s) {
       postResult({
         linesArrayJSON: "",
         lineCount: 0,
         success: !1,
-        errorMessage: t instanceof Error ? t.message : String(t)
-      }), s();
+        errorMessage: s instanceof Error ? s.message : String(s)
+      }), t();
     }
   });
 }
-function g(e) {
-  return new Promise((s, c) => {
+function N(e) {
+  return new Promise((t, a) => {
     try {
-      let t = [];
+      let s = [];
       if (e.linesArrayJSON)
         try {
-          const u = String(e.linesArrayJSON), i = JSON.parse(u);
-          if (!Array.isArray(i))
+          const i = String(e.linesArrayJSON), l = JSON.parse(i);
+          if (!Array.isArray(l))
             throw new Error("Lines array JSON is not an array");
-          t = i;
-        } catch (u) {
-          throw new Error("Invalid lines array JSON: " + (u instanceof Error ? u.message : String(u)));
+          s = l;
+        } catch (i) {
+          throw new Error("Invalid lines array JSON: " + (i instanceof Error ? i.message : String(i)));
         }
       const r = {};
-      e.shan && (r.SHAN = String(e.shan)), e.vr01 && (r.VR01 = String(e.vr01)), e.vr02 && (r.VR02 = String(e.vr02)), e.drqj && (r.DRQJ = String(e.drqj)), t.length > 0 && (r.GridIn_1_3 = t);
-      const n = e.prettyPrint, a = n && String(n).toLowerCase() === "true" ? JSON.stringify(r, null, 2) : JSON.stringify(r);
+      e.shan && (r.SHAN = String(e.shan)), e.vr01 && (r.VR01 = String(e.vr01)), e.vr02 && (r.VR02 = String(e.vr02)), e.drqj && (r.DRQJ = String(e.drqj)), s.length > 0 && (r.GridIn_1_3 = s);
+      const n = e.prettyPrint, u = n && String(n).toLowerCase() === "true" ? JSON.stringify(r, null, 2) : JSON.stringify(r);
       postResult({
-        requestJSON: a,
+        requestJSON: u,
         success: !0,
         errorMessage: "",
-        lineCount: t.length
-      }), s();
-    } catch (t) {
+        lineCount: s.length
+      }), t();
+    } catch (s) {
       postResult({
         requestJSON: "",
         success: !1,
-        errorMessage: t instanceof Error ? t.message : String(t),
+        errorMessage: s instanceof Error ? s.message : String(s),
         lineCount: 0
-      }), s();
+      }), t();
     }
   });
 }
-function p(e, s) {
-  return new Promise((c, t) => {
+function O(e, t) {
+  return new Promise((a, s) => {
     try {
-      const r = s.baseURL;
+      const r = t.baseURL;
       if (!r)
         throw new Error("Base URL is required in configuration");
       let n = String(r);
@@ -200,62 +204,75 @@ function p(e, s) {
       const o = {};
       if (e.shan && (o.SHAN = String(e.shan)), e.vr01 && (o.VR01 = String(e.vr01)), e.vr02 && (o.VR02 = String(e.vr02)), e.drqj && (o.DRQJ = String(e.drqj)), e.gridInJSON)
         try {
-          const i = String(e.gridInJSON);
-          o.GridIn_1_3 = JSON.parse(i);
-        } catch (i) {
-          throw new Error("Invalid GridIn_JSON format: " + (i instanceof Error ? i.message : String(i)));
+          const c = String(e.gridInJSON);
+          o.GridIn_1_3 = JSON.parse(c);
+        } catch (c) {
+          throw new Error("Invalid GridIn_JSON format: " + (c instanceof Error ? c.message : String(c)));
         }
-      const a = new XMLHttpRequest();
-      a.onreadystatechange = function() {
+      const u = JSON.stringify(o, null, 2), i = new XMLHttpRequest();
+      i.onreadystatechange = function() {
         try {
-          if (a.readyState !== 4) return;
-          const i = a.status >= 200 && a.status < 300;
+          if (i.readyState !== 4) return;
+          const c = i.status >= 200 && i.status < 300;
+          let y = "";
+          if (!c) {
+            y = "HTTP " + i.status + ": " + i.statusText;
+            try {
+              const d = JSON.parse(i.responseText);
+              d.errorMessage ? y = d.errorMessage : d.message ? y = d.message : d.error && (y = d.error);
+            } catch {
+              i.responseText && i.responseText.trim() !== "" && (y = i.responseText);
+            }
+          }
           postResult({
-            statusCode: a.status,
-            responseBody: a.responseText,
-            success: i,
-            errorMessage: i ? "" : "HTTP " + a.status + ": " + a.statusText
-          }), c();
-        } catch (i) {
-          t(i);
+            statusCode: i.status,
+            responseBody: i.responseText,
+            success: c,
+            errorMessage: y,
+            requestJSON: u
+          }), a();
+        } catch (c) {
+          s(c);
         }
-      }, a.open("POST", n), a.setRequestHeader("Content-Type", "application/json");
-      const u = s.bearerToken;
-      if (u && String(u).trim() !== "") {
-        const i = String(u).trim(), y = i.startsWith("Bearer ") ? i.substring(7).trim() : i;
-        a.setRequestHeader("Authorization", "Bearer " + encodeURIComponent(y));
-      }
-      a.send(JSON.stringify(o));
+      }, i.open("POST", n), i.setRequestHeader("Content-Type", "application/json");
+      const l = t.username, g = t.password;
+      if (l && g) {
+        const c = String(l).trim() + ":" + String(g).trim(), y = m(c);
+        i.setRequestHeader("Authorization", "Basic " + y);
+      } else
+        throw new Error("Username and Password are required in configuration");
+      i.send(JSON.stringify(o));
     } catch (r) {
       postResult({
         statusCode: 0,
         responseBody: "",
         success: !1,
-        errorMessage: r instanceof Error ? r.message : String(r)
-      }), c();
+        errorMessage: r instanceof Error ? r.message : String(r),
+        requestJSON: ""
+      }), a();
     }
   });
 }
-function S(e) {
-  return new Promise((s, c) => {
+function J(e) {
+  return new Promise((t, a) => {
     try {
-      const t = String(e.jsonString), r = JSON.parse(t);
+      const s = String(e.jsonString), r = JSON.parse(s);
       postResult({
         success: !0,
         errorMessage: "",
         requestJSON: JSON.stringify(r, null, 2)
-      }), s();
-    } catch (t) {
+      }), t();
+    } catch (s) {
       postResult({
         success: !1,
-        errorMessage: t instanceof Error ? t.message : String(t),
+        errorMessage: s instanceof Error ? s.message : String(s),
         requestJSON: ""
-      }), s();
+      }), t();
     }
   });
 }
-function N() {
-  return new Promise((e, s) => {
+function h() {
+  return new Promise((e, t) => {
     try {
       postResult({
         linesArrayJSON: "[]",
@@ -268,5 +285,14 @@ function N() {
       }), e();
     }
   });
+}
+function m(e) {
+  const t = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+  let a = "";
+  for (let s = 0; s < e.length; s += 3) {
+    const r = e.charCodeAt(s), n = s + 1 < e.length ? e.charCodeAt(s + 1) : 0, o = s + 2 < e.length ? e.charCodeAt(s + 2) : 0, u = r << 16 | n << 8 | o;
+    a += t[u >> 18 & 63], a += t[u >> 12 & 63], a += t[s + 1 < e.length ? u >> 6 & 63 : 64], a += t[s + 2 < e.length ? u & 63 : 64];
+  }
+  return a;
 }
 //# sourceMappingURL=jdedwardspricingorch.js.map
